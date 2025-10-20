@@ -58,8 +58,16 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            // add viewInsets bottom so the scrollable content gains enough space
+            // when the keyboard appears (prevents bottom overflowed by X pixels)
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -153,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: _weather!.daily.length,
-                              separatorBuilder: (_, __) => const SizedBox(width: 12),
+                              separatorBuilder: (context, index) => const SizedBox(width: 12),
                               itemBuilder: (context, i) {
                                 final day = _weather!.daily[i];
                                 final dateStr = "${day.date.month}/${day.date.day}";
@@ -166,47 +174,80 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Container(
                                       width: 140,
                                       padding: const EdgeInsets.all(14),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 6),
-                                          Image.network(
-                                            'https://openweathermap.org/img/wn/${day.icon}@2x.png',
-                                            width: 54,
-                                            height: 54,
-                                            errorBuilder: (_, __, ___) => const Icon(Icons.cloud, size: 40),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            day.condition,
-                                            style: const TextStyle(fontSize: 14),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            "${day.temp.toStringAsFixed(1)}°C",
-                                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Icon(Icons.water_drop, size: 16, color: Colors.blue),
-                                              const SizedBox(width: 2),
-                                              Text("${day.precipitation.toStringAsFixed(1)} mm", style: const TextStyle(fontSize: 12)),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Icon(Icons.air, size: 16, color: Colors.grey),
-                                              const SizedBox(width: 2),
-                                              Text("${day.wind.toStringAsFixed(1)} m/s", style: const TextStyle(fontSize: 12)),
-                                            ],
-                                          ),
-                                        ],
+                                      // allow the card's vertical content to scroll if it doesn't fit
+                                      child: SingleChildScrollView(
+                                        physics: const BouncingScrollPhysics(),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            const SizedBox(height: 6),
+                                            Image.network(
+                                              'https://openweathermap.org/img/wn/${day.icon}@2x.png',
+                                              width: 54,
+                                              height: 54,
+                                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.cloud, size: 40),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              day.condition,
+                                              style: const TextStyle(fontSize: 14),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              "${day.temp.toStringAsFixed(1)}°C",
+                                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text("Feels like ${day.feelsLike.toStringAsFixed(1)}°C", style: const TextStyle(fontSize: 12)),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.thermostat, size: 14, color: Colors.orange),
+                                                const SizedBox(width: 4),
+                                                Text("Min ${day.minTemp.toStringAsFixed(0)}° / Max ${day.maxTemp.toStringAsFixed(0)}°", style: const TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.water_drop, size: 16, color: Colors.blue),
+                                                const SizedBox(width: 4),
+                                                Text("${day.precipitation.toStringAsFixed(1)} mm", style: const TextStyle(fontSize: 12)),
+                                                const SizedBox(width: 8),
+                                                const Icon(Icons.opacity, size: 16, color: Colors.blueGrey),
+                                                const SizedBox(width: 4),
+                                                Text("${day.humidity}%", style: const TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.air, size: 16, color: Colors.grey),
+                                                const SizedBox(width: 4),
+                                                Text("${day.wind.toStringAsFixed(1)} m/s", style: const TextStyle(fontSize: 12)),
+                                                const SizedBox(width: 8),
+                                                Text("${day.windDirection}°", style: const TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.speed, size: 14, color: Colors.grey),
+                                                const SizedBox(width: 4),
+                                                Text("${day.pressure} hPa", style: const TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text("Clouds: ${day.cloudiness}%", style: const TextStyle(fontSize: 12)),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
