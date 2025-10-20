@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/weather_service.dart';
 import '../models/weather_model.dart';
-import '../widgets/weather_chart.dart';
-import 'package:lottie/lottie.dart';
+import 'dart:math';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -43,6 +43,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -58,42 +64,47 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 10),
-              TextField(
-                controller: _controller,
-                onSubmitted: (_) => _getWeather(),
-                decoration: InputDecoration(
-                  hintText: "Enter a city (e.g., Abidjan)",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_controller.text.isNotEmpty && !_loading)
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _controller.clear();
-                            setState(() {
-                              _weather = null;
-                              _error = null;
-                            });
-                          },
-                          tooltip: 'Clear',
-                        ),
-                      _loading
-                          ? Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.search),
-                              onPressed: _getWeather,
-                              tooltip: 'Search',
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, value, child) {
+                  return TextField(
+                    controller: _controller,
+                    onSubmitted: (_) => _getWeather(),
+                    decoration: InputDecoration(
+                      hintText: "Enter a city (e.g., Abidjan)",
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (value.text.isNotEmpty && !_loading)
+                            IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _controller.clear();
+                                setState(() {
+                                  _weather = null;
+                                  _error = null;
+                                });
+                              },
+                              tooltip: 'Clear',
                             ),
-                    ],
-                  ),
-                ),
+                          _loading
+                              ? Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                                )
+                              : IconButton(
+                                  icon: const Icon(Icons.search),
+                                  onPressed: _getWeather,
+                                  tooltip: 'Search',
+                                ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               if (_error != null)
@@ -214,11 +225,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     key: const ValueKey('welcome'),
                     children: [
                       const SizedBox(height: 30),
-                      Lottie.asset(
-                        'assets/lottie/weather-welcome.json',
+                      SizedBox(
                         width: 180,
                         height: 180,
-                        repeat: true,
+                        child: const _AnimatedWeatherWelcome(),
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -233,6 +243,81 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedWeatherWelcome extends StatefulWidget {
+  const _AnimatedWeatherWelcome();
+
+  @override
+  State<_AnimatedWeatherWelcome> createState() => _AnimatedWeatherWelcomeState();
+}
+
+class _AnimatedWeatherWelcomeState extends State<_AnimatedWeatherWelcome> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _cloudOffset;
+  late final Animation<double> _sunRotation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+    _cloudOffset = Tween<double>(begin: 0, end: 20).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _sunRotation = Tween<double>(begin: 0, end: 2 * pi).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Transform.rotate(
+              angle: _sunRotation.value,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(colors: [Colors.yellow[600]!, Colors.orange[300]!]),
+                  boxShadow: [BoxShadow(color: Color.fromRGBO(255, 165, 0, 0.3), blurRadius: 18)],
+                ),
+                child: Icon(Icons.wb_sunny, color: Colors.yellow[100], size: 48),
+              ),
+            ),
+            Positioned(
+              bottom: 30 + _cloudOffset.value,
+              left: 40,
+              child: Opacity(
+                opacity: 0.9,
+                child: Container(
+                  width: 70,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey[100],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.cloud, color: Colors.blueGrey[400], size: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
