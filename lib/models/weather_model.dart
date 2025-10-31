@@ -39,10 +39,12 @@ class DailyForecast {
 class WeatherModel {
   final String city;
   final List<DailyForecast> daily;
+  final List<HourlyForecast> hourly;
 
   WeatherModel({
     required this.city,
     required this.daily,
+    required this.hourly,
   });
 
   factory WeatherModel.fromJson(Map<String, dynamic> json) {
@@ -131,9 +133,50 @@ class WeatherModel {
         icon: icon,
       ));
     });
+    // Build hourly list (flatten entries -> HourlyForecast)
+    final List<HourlyForecast> hourly = list.map((e) {
+      final dtTxt = e['dt_txt'] as String?;
+      final dt = dtTxt != null ? DateTime.parse(dtTxt) : DateTime.fromMillisecondsSinceEpoch((e['dt'] as int) * 1000);
+      final main = e['main'];
+      final weather = (e['weather'] as List).isNotEmpty ? e['weather'][0] : null;
+      return HourlyForecast(
+        dateTime: dt,
+        temp: (main['temp'] as num).toDouble(),
+        feelsLike: (main['feels_like'] as num?)?.toDouble() ?? (main['temp'] as num).toDouble(),
+        humidity: (main['humidity'] as num?)?.toInt() ?? 0,
+        wind: (e['wind']?['speed'] as num?)?.toDouble() ?? 0.0,
+        precipitation: ((e['rain']?['3h'] as num?)?.toDouble() ?? 0.0) + ((e['snow']?['3h'] as num?)?.toDouble() ?? 0.0),
+        condition: weather != null ? (weather['description'] as String) : '',
+        icon: weather != null ? (weather['icon'] as String) : '',
+      );
+    }).toList();
+
     return WeatherModel(
       city: json['city']['name'],
       daily: daily,
+      hourly: hourly,
     );
   }
+}
+
+class HourlyForecast {
+  final DateTime dateTime;
+  final double temp;
+  final double feelsLike;
+  final int humidity;
+  final double wind;
+  final double precipitation;
+  final String condition;
+  final String icon;
+
+  HourlyForecast({
+    required this.dateTime,
+    required this.temp,
+    required this.feelsLike,
+    required this.humidity,
+    required this.wind,
+    required this.precipitation,
+    required this.condition,
+    required this.icon,
+  });
 }

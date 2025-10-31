@@ -14,7 +14,7 @@ kotlin {
 
 android {
     namespace = "com.example.weather_insights_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -5,8 +5,10 @@
 
 buildscript {
     extra.apply {
+        set("kotlin_version", "1.9.22")
+        set("gradle_version", "8.1.0")
         set("compileSdkVersion", 36)
-        set("targetSdkVersion", 34)
+        set("targetSdkVersion", 36)
         set("minSdkVersion", 23)
     }
     

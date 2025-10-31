@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'cache_service.dart';
 import '../models/weather_model.dart';
 
 class WeatherService {
@@ -14,7 +15,8 @@ class WeatherService {
     return null;
   }
 
-  Future<WeatherModel?> fetchWeather(String city) async {
+  /// If [lat] and [lon] are provided, query by coordinates; otherwise use city name.
+  Future<WeatherModel?> fetchWeather(String city, {double? lat, double? lon}) async {
     final key = _apiKey();
     if (key == null) {
       // no key configured
@@ -25,7 +27,9 @@ class WeatherService {
       return null;
     }
 
-    final url = Uri.parse('$baseUrl/forecast?q=$city&appid=$key&units=metric');
+  final url = (lat != null && lon != null)
+    ? Uri.parse('$baseUrl/forecast?lat=$lat&lon=$lon&appid=$key&units=metric')
+    : Uri.parse('$baseUrl/forecast?q=$city&appid=$key&units=metric');
     // ignore: avoid_print
     print('[WeatherService] GET ${url.toString().replaceAll(key, '***')}');
 
@@ -38,6 +42,22 @@ class WeatherService {
       return null;
     }
 
+    // cache the last successful response
+    try {
+      await CacheService.saveLastWeatherJson(response.body);
+    } catch (_) {}
+
     return WeatherModel.fromJson(jsonDecode(response.body));
+  }
+
+  /// Try to return the last cached weather JSON parsed into a model.
+  Future<WeatherModel?> fetchLastCached() async {
+    final cached = await CacheService.getLastWeatherJson();
+    if (cached == null) return null;
+    try {
+      return WeatherModel.fromJson(jsonDecode(cached));
+    } catch (e) {
+      return null;
+    }
   }
 }
