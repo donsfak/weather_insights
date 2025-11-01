@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/weather_model.dart';
 
-class AnimatedWeatherCard extends StatelessWidget {
+class AnimatedWeatherCard extends StatefulWidget {
   final DailyForecast day;
   final VoidCallback onTap;
 
@@ -12,60 +13,134 @@ class AnimatedWeatherCard extends StatelessWidget {
   });
 
   @override
+  State<AnimatedWeatherCard> createState() => _AnimatedWeatherCardState();
+}
+
+class _AnimatedWeatherCardState extends State<AnimatedWeatherCard> with SingleTickerProviderStateMixin {
+  late final AnimationController _scaleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      lowerBound: 0.95,
+      upperBound: 1.0,
+    )..value = 1.0;
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  LinearGradient _getWeatherGradient(String condition) {
+    switch (condition.toLowerCase()) {
+      case 'rain':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF536976), Color(0xFF292E49)],
+        );
+      case 'clear':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFEE59), Color(0xFFF93759)],
+        );
+      case 'clouds':
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF757F9A), Color(0xFFD7DDE8)],
+        );
+      default:
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF283E51), Color(0xFF4B5563)],
+        );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final dateStr = "${day.date.month}/${day.date.day}";
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 400),
-      tween: Tween(begin: 0.0, end: 1.0),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) => Transform.scale(
-        scale: 0.95 + (0.05 * value),
-        child: Opacity(
-          opacity: value,
-          child: Hero(
-            tag: 'weather_card_${day.date.millisecondsSinceEpoch}',
-            child: Card(
-              elevation: 2 * value,
-              // ignore: deprecated_member_use
-              shadowColor: Colors.blue.withOpacity(0.3),
-              color: Colors.blue[50],
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    final dateStr = "${widget.day.date.month}/${widget.day.date.day}";
+    return AnimatedBuilder(
+      animation: _scaleController,
+      builder: (context, child) => Transform.scale(
+        scale: _scaleController.value,
+        child: Hero(
+          tag: 'weather_card_${widget.day.date.millisecondsSinceEpoch}',
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000), // 10% opacity black
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
               child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(16),
-                // ignore: deprecated_member_use
-                splashColor: Colors.blue.withOpacity(0.1),
-                // ignore: deprecated_member_use
-                highlightColor: Colors.blue.withOpacity(0.05),
+                onTapDown: (_) {
+                  _scaleController.reverse();
+                },
+                onTapUp: (_) {
+                  _scaleController.forward();
+                  widget.onTap();
+                },
+                onTapCancel: () {
+                  _scaleController.forward();
+                },
+                borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  width: 120,
-                  padding: const EdgeInsets.all(12),
+                  width: 140,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: _getWeatherGradient(widget.day.condition),
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Image.network(
-                        'https://openweathermap.org/img/wn/${day.icon}@2x.png',
-                        width: 50,
-                        height: 50,
-                        errorBuilder: (context, error, stackTrace) => 
-                            const Icon(Icons.cloud, size: 36),
-                      ),
-                      const SizedBox(height: 2),
                       Text(
-                        "${day.temp.toStringAsFixed(1)}°C",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
+                        dateStr,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Image.network(
+                        'https://openweathermap.org/img/wn/${widget.day.icon}@2x.png',
+                        width: 60,
+                        height: 60,
+                        errorBuilder: (context, error, stackTrace) => 
+                            const Icon(Icons.cloud, size: 48, color: Colors.white),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${widget.day.temp.toStringAsFixed(1)}°C",
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        day.condition,
-                        style: const TextStyle(fontSize: 12),
+                        widget.day.condition,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: const Color(0xE6FFFFFF), // 90% opacity white
+                        ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

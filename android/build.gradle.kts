@@ -5,7 +5,7 @@
 
 buildscript {
     extra.apply {
-        set("kotlin_version", "1.9.22")
+        set("kotlin_version", "2.1.0")
         set("gradle_version", "8.1.0")
         set("compileSdkVersion", 36)
         set("targetSdkVersion", 36)
@@ -18,7 +18,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
         classpath("com.android.tools.build:gradle:8.1.0")
     }
 }
