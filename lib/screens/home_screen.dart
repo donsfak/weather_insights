@@ -6,6 +6,7 @@ import 'package:weather_insights_app/widgets/glass_container.dart';
 import '../widgets/animated_weather_icon.dart';
 import 'dart:math' show pi, sin;
 import '../services/weather_service.dart';
+import '../services/widget_service.dart';
 import '../models/weather_model.dart';
 import '../screens/weather_details_screen.dart';
 import '../screens/advanced_charts_screen.dart';
@@ -102,6 +103,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
       if (data != null) {
         _fadeController.forward(from: 0);
+        // Update widget with new weather data
+        await WidgetService.updateWidget(data);
       }
     } catch (e) {
       if (!mounted) return;

@@ -6,9 +6,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'managers/settings_manager.dart';
+import 'services/widget_service.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize widget service
+  await WidgetService.initialize();
+
+  // Initialize notification service
+  await NotificationService.initialize();
+
   await dotenv.load(fileName: ".env");
   await SettingsManager().init();
 

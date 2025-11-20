@@ -15,6 +15,7 @@ class DailyForecast {
   final int cloudiness; // percent
   final String condition;
   final String icon;
+  final double uvi;
 
   DailyForecast({
     required this.date,
@@ -33,6 +34,7 @@ class DailyForecast {
     required this.cloudiness,
     required this.condition,
     required this.icon,
+    required this.uvi,
   });
 }
 
@@ -74,6 +76,7 @@ class WeatherModel {
       int sumWindDir = 0;
       int sumCloud = 0;
       double sumPrecip = 0;
+      double sumUvi = 0; // Added for UVI
       int count = entries.length;
 
       for (var e in entries) {
@@ -91,6 +94,7 @@ class WeatherModel {
         sumWind += windVal;
         sumWindDir += (e['wind']['deg'] as num).toInt();
         sumCloud += (e['clouds']?['all'] as num?)?.toInt() ?? 0;
+        sumUvi += (e['uvi'] as num?)?.toDouble() ?? 0.0; // Added for UVI
 
         // precipitation
         if (e['rain'] != null && e['rain']['3h'] != null) {
@@ -109,6 +113,7 @@ class WeatherModel {
       final avgWind = sumWind / count;
       final avgWindDir = (sumWindDir / count).round();
       final avgCloud = (sumCloud / count).round();
+      final avgUvi = sumUvi / count; // Added for UVI
 
       // choose representative weather entry (noon or first)
       final rep = entries.firstWhere(
@@ -141,6 +146,7 @@ class WeatherModel {
           cloudiness: avgCloud,
           condition: condition,
           icon: icon,
+          uvi: avgUvi, // Added for UVI
         ),
       );
     });
