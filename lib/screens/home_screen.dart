@@ -4,17 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:weather_insights_app/components/theme_switcher.dart';
 import 'package:weather_insights_app/widgets/glass_container.dart';
 import '../widgets/animated_weather_icon.dart';
-import 'dart:math' show pi, sin;
+import 'dart:math' show sin;
 import '../services/weather_service.dart';
 import '../services/widget_service.dart';
 import '../models/weather_model.dart';
-import '../screens/weather_details_screen.dart';
 import '../screens/advanced_charts_screen.dart';
 import 'dart:ui';
 import '../managers/settings_manager.dart';
 import '../widgets/forecast_chart.dart';
 import '../widgets/alert_banner.dart';
 import '../screens/map_screen.dart';
+import 'package:latlong2/latlong.dart';
+import '../services/air_quality_service.dart';
+import '../models/air_quality_model.dart';
+import '../widgets/clothing_recommendation_card.dart';
+import '../widgets/air_quality_card.dart';
+import '../widgets/uv_index_card.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -32,7 +37,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final WeatherService _service = WeatherService();
+  final AirQualityService _aqiService = AirQualityService();
   WeatherModel? _weather;
+  AirQualityModel? _airQuality;
   final TextEditingController _controller = TextEditingController();
   bool _loading = false;
   String? _error;
@@ -105,6 +112,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _fadeController.forward(from: 0);
         // Update widget with new weather data
         await WidgetService.updateWidget(data);
+
+        // Fetch Air Quality
+        if (data.lat != 0 && data.lon != 0) {
+          final aqi = await _aqiService.fetchAirQuality(data.lat, data.lon);
+          if (mounted) {
+            setState(() {
+              _airQuality = aqi;
+            });
+          }
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -344,7 +361,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MapScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => MapScreen(
+                        initialLocation: _weather != null
+                            ? LatLng(_weather!.lat, _weather!.lon)
+                            : null,
+                      ),
+                    ),
                   );
                 },
                 tooltip: 'View Map',
@@ -528,7 +551,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       Text(
                                         _getDayName(DateTime.now()),
                                         style: TextStyle(
-                                          fontSize: 16,
                                           color: Colors.white.withOpacity(0.7),
                                         ),
                                       ),
@@ -578,13 +600,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                                   const SizedBox(height: 24),
 
+                                  // Clothing Recommendation
+                                  if (_weather != null)
+                                    ClothingRecommendationCard(
+                                      temperature: _weather!.daily.first.temp,
+                                      condition:
+                                          _weather!.daily.first.condition,
+                                      wind: _weather!.daily.first.wind,
+                                      humidity: _weather!.daily.first.humidity,
+                                    ),
+
+                                  const SizedBox(height: 24),
+
+                                  // Air Quality
+                                  if (_airQuality != null)
+                                    AirQualityCard(airQuality: _airQuality),
+
+                                  const SizedBox(height: 24),
+
+                                  // UV Index
+                                  if (_weather != null)
+                                    UVIndexCard(
+                                      uvIndex: _weather!.daily.first.uvi,
+                                    ),
+
+                                  const SizedBox(height: 24),
                                   // 7-Day Forecast Header
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       const Text(
-                                        "Today",
+                                        "Hourly Forecast",
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -629,12 +676,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     height: 160,
                                     child: ListView.separated(
                                       scrollDirection: Axis.horizontal,
-                                      itemCount: _weather!.daily.length,
+                                      itemCount: _weather!.hourly.length,
                                       separatorBuilder: (context, index) =>
                                           const SizedBox(width: 12),
                                       itemBuilder: (context, i) {
-                                        final day = _weather!.daily[i];
-                                        return _buildModernWeatherCard(day, i);
+                                        final hour = _weather!.hourly[i];
+                                        return _buildHourlyWeatherCard(hour);
                                       },
                                     ),
                                   ),
@@ -788,63 +835,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildModernWeatherCard(DailyForecast day, int index) {
-    final timeStr =
-        "${day.date.hour}:00"; // Mock time for visual consistency with design
-    final isSelected = index == 1; // Mock selection for visual demo
+  Widget _buildHourlyWeatherCard(HourlyForecast hour) {
+    final now = DateTime.now();
+    final isNow =
+        hour.dateTime.hour == now.hour &&
+        hour.dateTime.day == now.day &&
+        hour.dateTime.month == now.month;
 
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 400),
-          pageBuilder: (context, anim1, anim2) => FadeTransition(
-            opacity: anim1,
-            child: WeatherDetailsScreen(
-              day: day,
-              hourlyData: _weather!.hourly
-                  .where(
-                    (h) =>
-                        h.dateTime.day == day.date.day &&
-                        h.dateTime.month == day.date.month,
-                  )
-                  .toList(),
+    final timeStr = isNow
+        ? "Now"
+        : "${hour.dateTime.hour.toString().padLeft(2, '0')}:00";
+
+    return GlassContainer(
+      width: 100,
+      color: isNow ? Colors.blue : Colors.white,
+      opacity: isNow ? 0.4 : 0.1,
+      borderRadius: BorderRadius.circular(24),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: SettingsManager().isCelsius,
+            builder: (context, isCelsius, _) {
+              final temp = SettingsManager().convertTemp(hour.temp);
+              return Text(
+                "${temp.toStringAsFixed(0)}°",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
+          AnimatedWeatherIcon(description: hour.condition, size: 32),
+          Text(
+            timeStr,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 14,
             ),
           ),
-        ),
-      ),
-      child: GlassContainer(
-        width: 100,
-        color: isSelected ? Colors.blue : Colors.white,
-        opacity: isSelected ? 0.4 : 0.1,
-        borderRadius: BorderRadius.circular(24),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: SettingsManager().isCelsius,
-              builder: (context, isCelsius, _) {
-                final temp = SettingsManager().convertTemp(day.maxTemp);
-                return Text(
-                  "${temp.toStringAsFixed(0)}°",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                );
-              },
-            ),
-            AnimatedWeatherIcon(description: day.condition, size: 32),
-            Text(
-              timeStr,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

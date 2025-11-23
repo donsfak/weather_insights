@@ -9,22 +9,23 @@ plugins {
 // when the system JDK is newer (e.g. JDK 21). Using Java 17 for compilation is recommended
 // for modern Android Gradle Plugin versions.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 android {
     namespace = "com.example.weather_insights_app"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.0.12433566"
+    buildToolsVersion = "36.0.0"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 
     defaultConfig {

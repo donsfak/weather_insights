@@ -5,10 +5,15 @@ import 'package:geolocator/geolocator.dart';
 import '../managers/settings_manager.dart';
 import '../services/weather_service.dart';
 import '../models/weather_model.dart';
+import 'dart:async';
 import 'dart:ui';
+import '../widgets/map_timeline_control.dart';
+import '../widgets/precipitation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final LatLng? initialLocation;
+
+  const MapScreen({super.key, this.initialLocation});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -18,16 +23,33 @@ class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   LatLng _center = const LatLng(5.4164, -4.0083); // Default to Abidjan
   LatLng? _userLocation;
-  bool _showPrecipitation = true;
   WeatherModel? _weather;
   final WeatherService _weatherService = WeatherService();
   String _locationStatus = 'Searching for location...';
   bool _isLocationLoading = true;
 
+  // Forecasting
+  double _currentForecastHour = 0;
+  bool _isPlaying = false;
+  Timer? _animationTimer;
+
+  // Layer Control
+  String _currentLayer = 'precipitation'; // precipitation, temp_new
+  final String _apiKey =
+      'e1f10a1e78da46f5b10a8f027813603c'; // Replace with env var in real app
+
   @override
   void initState() {
     super.initState();
-    _requestLocationPermission();
+    if (widget.initialLocation != null) {
+      _center = widget.initialLocation!;
+      _userLocation = widget.initialLocation; // Treat as user loc for now
+      _locationStatus = 'Showing selected city';
+      _isLocationLoading = false;
+      _fetchWeatherForLocation(_center);
+    } else {
+      _requestLocationPermission();
+    }
   }
 
   Future<void> _requestLocationPermission() async {
@@ -75,6 +97,12 @@ class _MapScreenState extends State<MapScreen> {
       });
       debugPrint('[MAP] Permission error: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _animationTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _getUserLocation() async {
@@ -148,12 +176,26 @@ class _MapScreenState extends State<MapScreen> {
               },
             ),
             children: [
+              // Dark Base Map (CartoDB Dark Matter)
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.example.weather_insights_app',
               ),
-              if (_showPrecipitation)
-                MarkerLayer(markers: _buildPrecipitationMarkers()),
+              // Apple Weather-style Precipitation Overlay
+              if (_currentLayer == 'precipitation')
+                AnimatedPrecipitationLayer(
+                  isPlaying: _isPlaying,
+                  currentHour: _currentForecastHour,
+                ),
+              // Temperature layer (fallback)
+              if (_currentLayer == 'temp_new')
+                TileLayer(
+                  urlTemplate:
+                      'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=$_apiKey',
+                  userAgentPackageName: 'com.example.weather_insights_app',
+                ),
               // User location marker
               if (_userLocation != null)
                 MarkerLayer(
@@ -185,7 +227,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // Controls (top right)
+          // Layer Control (top right)
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
@@ -194,7 +236,33 @@ class _MapScreenState extends State<MapScreen> {
                 _buildGlassButton(
                   icon: Icons.layers,
                   onPressed: () {
-                    setState(() => _showPrecipitation = !_showPrecipitation);
+                    setState(() {
+                      if (_currentLayer == 'precipitation') {
+                        _currentLayer = 'temp_new';
+                      } else {
+                        _currentLayer = 'precipitation';
+                      }
+                    });
+                    String layerName = 'PRECIPITATION';
+                    if (_currentLayer == 'temp_new') {
+                      layerName = 'TEMPERATURE';
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Layer: $layerName'),
+                        duration: const Duration(milliseconds: 1000),
+                        backgroundColor: Colors.black87,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.only(
+                          bottom: 120,
+                          left: 20,
+                          right: 20,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 8),
@@ -240,13 +308,26 @@ class _MapScreenState extends State<MapScreen> {
               child: _buildWeatherCard(isDarkMode),
             ),
 
-          // Precipitation legend (bottom left)
-          if (_showPrecipitation)
-            Positioned(
-              bottom: 32,
-              left: 16,
-              child: _buildPrecipitationLegend(isDarkMode),
+          // Timeline Control (bottom)
+          Positioned(
+            bottom: 32,
+            left: 16,
+            right: 16,
+            child: MapTimelineControl(
+              currentHour: _currentForecastHour,
+              isPlaying: _isPlaying,
+              onChanged: (value) {
+                setState(() {
+                  _currentForecastHour = value;
+                  if (_isPlaying) {
+                    _isPlaying = false;
+                    _animationTimer?.cancel();
+                  }
+                });
+              },
+              onPlayPause: _togglePlay,
             ),
+          ),
 
           // Location status debug overlay (bottom right)
           if (_isLocationLoading || _userLocation == null)
@@ -375,69 +456,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _buildPrecipitationLegend(bool isDarkMode) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Précipitations',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildLegendItem('Extrêmes', const Color(0xFFFF0000)),
-              _buildLegendItem('Fortes', const Color(0xFFFF6B00)),
-              _buildLegendItem('Modérées', const Color(0xFF9B59B6)),
-              _buildLegendItem('Faibles', const Color(0xFF3498DB)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 20,
-            height: 12,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 11),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<Marker> _buildSavedLocationMarkers() {
     final savedLocations = SettingsManager().savedLocations.value;
     return savedLocations.map((cityName) {
@@ -470,73 +488,34 @@ class _MapScreenState extends State<MapScreen> {
     return cityCoords[cityName] ?? const LatLng(0, 0);
   }
 
-  List<Marker> _buildPrecipitationMarkers() {
-    // Simulated precipitation zones around Abidjan/Abobo area
-    final List<Map<String, dynamic>> precipZones = [
-      {'lat': 5.35, 'lon': -4.05, 'intensity': 'extreme'},
-      {'lat': 5.42, 'lon': -4.02, 'intensity': 'heavy'},
-      {'lat': 5.40, 'lon': -3.98, 'intensity': 'moderate'},
-      {'lat': 5.38, 'lon': -4.10, 'intensity': 'light'},
-      {'lat': 5.45, 'lon': -4.08, 'intensity': 'heavy'},
-      {'lat': 5.32, 'lon': -3.95, 'intensity': 'moderate'},
-      {'lat': 5.48, 'lon': -4.15, 'intensity': 'light'},
-      // Additional zones near user's potential location
-      {
-        'lat': _center.latitude + 0.02,
-        'lon': _center.longitude + 0.02,
-        'intensity': 'moderate',
-      },
-      {
-        'lat': _center.latitude - 0.03,
-        'lon': _center.longitude - 0.01,
-        'intensity': 'light',
-      },
-      {
-        'lat': _center.latitude + 0.01,
-        'lon': _center.longitude - 0.03,
-        'intensity': 'heavy',
-      },
-    ];
-
-    return precipZones.map((zone) {
-      Color markerColor;
-      double size;
-
-      switch (zone['intensity']) {
-        case 'extreme':
-          markerColor = const Color(0xFFFF0000);
-          size = 60;
-          break;
-        case 'heavy':
-          markerColor = const Color(0xFFFF6B00);
-          size = 50;
-          break;
-        case 'moderate':
-          markerColor = const Color(0xFF9B59B6);
-          size = 40;
-          break;
-        case 'light':
-        default:
-          markerColor = const Color(0xFF3498DB);
-          size = 30;
-          break;
+  void _togglePlay() {
+    setState(() {
+      _isPlaying = !_isPlaying;
+      if (_isPlaying) {
+        _startAnimation();
+      } else {
+        _animationTimer?.cancel();
       }
+    });
+  }
 
-      return Marker(
-        point: LatLng(zone['lat'], zone['lon']),
-        width: size,
-        height: size,
-        child: Container(
-          decoration: BoxDecoration(
-            color: markerColor.withOpacity(0.4),
-            shape: BoxShape.circle,
-            border: Border.all(color: markerColor, width: 2),
-          ),
-          child: Center(
-            child: Icon(Icons.water_drop, color: markerColor, size: size * 0.4),
-          ),
-        ),
-      );
-    }).toList();
+  void _startAnimation() {
+    const fps = 30;
+    const durationSeconds = 10; // 12 hours in 10 seconds
+    const totalFrames = fps * durationSeconds;
+    const hourPerFrame = 12.0 / totalFrames;
+
+    _animationTimer?.cancel();
+    _animationTimer = Timer.periodic(
+      const Duration(milliseconds: 1000 ~/ fps),
+      (timer) {
+        setState(() {
+          _currentForecastHour += hourPerFrame;
+          if (_currentForecastHour >= 12) {
+            _currentForecastHour = 0;
+          }
+        });
+      },
+    );
   }
 }

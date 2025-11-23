@@ -43,12 +43,16 @@ class WeatherModel {
   final List<DailyForecast> daily;
   final List<HourlyForecast> hourly;
   final List<WeatherAlert> alerts;
+  final double lat;
+  final double lon;
 
   WeatherModel({
     required this.city,
     required this.daily,
     required this.hourly,
     this.alerts = const [],
+    required this.lat,
+    required this.lon,
   });
 
   factory WeatherModel.fromJson(Map<String, dynamic> json) {
@@ -188,6 +192,8 @@ class WeatherModel {
       daily: daily,
       hourly: hourly,
       alerts: alerts,
+      lat: (json['city']['coord']['lat'] as num).toDouble(),
+      lon: (json['city']['coord']['lon'] as num).toDouble(),
     );
   }
 }

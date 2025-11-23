@@ -9,7 +9,7 @@ buildscript {
         set("gradle_version", "8.12.0")
         set("compileSdkVersion", 36)
         set("targetSdkVersion", 36)
-        set("minSdkVersion", 23)
+        set("minSdkVersion", 24)
     }
     
     repositories {
@@ -50,13 +50,13 @@ subprojects {
                 compileSdkVersion(36)
                 
                 defaultConfig {
-                    minSdk = 23
+                    minSdk = 24
                     targetSdk = 36
                 }
                 
                 compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
+                    sourceCompatibility = JavaVersion.VERSION_21
+                    targetCompatibility = JavaVersion.VERSION_21
                 }
             }
         }
