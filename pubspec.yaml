@@ -46,6 +46,7 @@ dependencies:
   permission_handler: ^11.3.1
   home_widget: ^0.6.0
   flutter_local_notifications: ^17.2.3
+  flutter_map_cancellable_tile_provider: ^3.0.2
 
 dev_dependencies:
   flutter_test:

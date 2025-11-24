@@ -3,11 +3,17 @@ import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
 import '../managers/settings_manager.dart';
 
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 class WidgetService {
   static const String _widgetName = 'WeatherWidget';
 
   /// Initialize the widget service
   static Future<void> initialize() async {
+    if (kIsWeb) return;
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+
     try {
       await HomeWidget.setAppGroupId('group.weather.insights');
       debugPrint('[WidgetService] Initialized');
@@ -18,6 +24,9 @@ class WidgetService {
 
   /// Update widget with current weather data
   static Future<void> updateWidget(WeatherModel? weather) async {
+    if (kIsWeb) return;
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+
     if (weather == null) {
       debugPrint('[WidgetService] No weather data to update widget');
       return;

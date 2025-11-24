@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:ui';
 import '../widgets/map_timeline_control.dart';
 import '../widgets/precipitation_overlay.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
 class MapScreen extends StatefulWidget {
   final LatLng? initialLocation;
@@ -182,6 +183,7 @@ class _MapScreenState extends State<MapScreen> {
                     'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
                 subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.example.weather_insights_app',
+                tileProvider: CancellableNetworkTileProvider(),
               ),
               // Apple Weather-style Precipitation Overlay
               if (_currentLayer == 'precipitation')
