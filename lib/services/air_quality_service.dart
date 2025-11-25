@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/air_quality_model.dart';
-import 'package:flutter/foundation.dart';
+import '../utils/exceptions.dart';
 
 class AirQualityService {
   final String baseUrl =
       'https://api.openweathermap.org/data/2.5/air_pollution';
+  final http.Client client;
+
+  AirQualityService({http.Client? client}) : client = client ?? http.Client();
 
   String? _apiKey() {
     final envKey = dotenv.env['OPENWEATHER_API_KEY'];
@@ -19,30 +23,33 @@ class AirQualityService {
   Future<AirQualityModel?> fetchAirQuality(double lat, double lon) async {
     final key = _apiKey();
     if (key == null) {
-      debugPrint('[AirQualityService] OPENWEATHER_API_KEY is not set');
-      return null;
+      throw WeatherException('API key not configured');
     }
 
     try {
       final url = Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$key');
-      debugPrint(
-        '[AirQualityService] GET ${url.toString().replaceAll(key, '***')}',
-      );
+      // ignore: avoid_print
+      print('[AirQualityService] GET ${url.toString().replaceAll(key, '***')}');
 
-      final response = await http.get(url);
+      final response = await client.get(url);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['list'] != null && (data['list'] as List).isNotEmpty) {
           return AirQualityModel.fromJson(data['list'][0]);
         }
+        return null; // Valid response but no data
       } else {
-        debugPrint('[AirQualityService] HTTP ${response.statusCode}');
+        throw ApiException(
+          response.statusCode,
+          'Failed to fetch air quality data',
+        );
       }
-      return null;
+    } on SocketException {
+      throw NetworkException('No internet connection');
     } catch (e) {
-      debugPrint('[AirQualityService] Error: $e');
-      return null;
+      if (e is WeatherException) rethrow;
+      throw WeatherException('Unexpected error: $e');
     }
   }
 }

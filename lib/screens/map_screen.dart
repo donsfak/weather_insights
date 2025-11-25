@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:ui';
 import '../widgets/map_timeline_control.dart';
 import '../widgets/precipitation_overlay.dart';
+import '../widgets/precipitation_legend.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
 class MapScreen extends StatefulWidget {
@@ -310,6 +311,9 @@ class _MapScreenState extends State<MapScreen> {
               child: _buildWeatherCard(isDarkMode),
             ),
 
+          // Precipitation Legend (Top Right, below layers button)
+          if (_currentLayer == 'precipitation')
+            const Positioned(top: 100, right: 16, child: PrecipitationLegend()),
           // Timeline Control (bottom)
           Positioned(
             bottom: 32,

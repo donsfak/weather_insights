@@ -1,11 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'cache_service.dart';
 import '../models/weather_model.dart';
+import '../utils/exceptions.dart';
 
 class WeatherService {
   final String baseUrl = 'https://api.openweathermap.org/data/2.5';
+  final http.Client client;
+
+  WeatherService({http.Client? client}) : client = client ?? http.Client();
 
   String? _apiKey() {
     final envKey = dotenv.env['OPENWEATHER_API_KEY'];
@@ -23,12 +28,7 @@ class WeatherService {
   }) async {
     final key = _apiKey();
     if (key == null) {
-      // no key configured
-      // Do not print API key. Print a helpful debug line instead.
-      // Caller/UI should show a user-friendly message.
-      // ignore: avoid_print
-      print('[WeatherService] OPENWEATHER_API_KEY is not set');
-      return null;
+      throw WeatherException('API key not configured');
     }
 
     final url = (lat != null && lon != null)
@@ -36,62 +36,12 @@ class WeatherService {
             '$baseUrl/forecast?lat=$lat&lon=$lon&appid=$key&units=metric',
           )
         : Uri.parse('$baseUrl/forecast?q=$city&appid=$key&units=metric');
+
     // ignore: avoid_print
     print('[WeatherService] GET ${url.toString().replaceAll(key, '***')}');
 
-    final response = await http.get(url);
-
-    // debug the response code and a short excerpt if not 200
-    if (response.statusCode != 200) {
-      // ignore: avoid_print
-      print(
-        '[WeatherService] HTTP ${response.statusCode} - ${response.body.length} bytes',
-      );
-      return null;
-    }
-
-    // cache the last successful response
     try {
-      await CacheService.saveLastWeatherJson(response.body);
-    } catch (_) {}
-
-    return WeatherModel.fromJson(jsonDecode(response.body));
-  }
-
-  /// Try to return the last cached weather JSON parsed into a model.
-  Future<WeatherModel?> fetchLastCached() async {
-    final cached = await CacheService.getLastWeatherJson();
-    if (cached == null) return null;
-    try {
-      return WeatherModel.fromJson(jsonDecode(cached));
-    } catch (e) {
-      // ignore: avoid_print
-      print('Error fetching weather: $e');
-      return null;
-    }
-  }
-
-  Future<WeatherModel?> fetchWeatherByCoords(double lat, double lon) async {
-    final key = _apiKey();
-    if (key == null) {
-      // ignore: avoid_print
-      print(
-        '[WeatherService] OPENWEATHER_API_KEY is not set for fetchWeatherByCoords',
-      );
-      return null;
-    }
-
-    try {
-      final forecastUrl = Uri.parse(
-        'https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$key&units=metric',
-      );
-
-      // ignore: avoid_print
-      print(
-        '[WeatherService] GET ${forecastUrl.toString().replaceAll(key, '***')}',
-      );
-
-      final response = await http.get(forecastUrl);
+      final response = await client.get(url);
 
       if (response.statusCode == 200) {
         // cache the last successful response
@@ -99,19 +49,80 @@ class WeatherService {
           await CacheService.saveLastWeatherJson(response.body);
         } catch (_) {}
 
-        final data = jsonDecode(response.body);
-        return WeatherModel.fromJson(data);
+        final data = json.decode(response.body);
+
+        // Extract coordinates from weather response to fetch UV index
+        double? fetchedLat = lat;
+        double? fetchedLon = lon;
+
+        if (fetchedLat == null || fetchedLon == null) {
+          try {
+            final cityData = data['city'];
+            if (cityData != null && cityData['coord'] != null) {
+              fetchedLat = (cityData['coord']['lat'] as num).toDouble();
+              fetchedLon = (cityData['coord']['lon'] as num).toDouble();
+            }
+          } catch (e) {
+            // ignore: avoid_print
+            print('[WeatherService] Failed to extract coords: $e');
+          }
+        }
+
+        // Fetch UV index if we have coordinates
+        double uvIndex = 0.0;
+        if (fetchedLat != null && fetchedLon != null) {
+          uvIndex = await _fetchUVIndex(fetchedLat, fetchedLon, city);
+        }
+
+        return WeatherModel.fromJson(data, uvIndexOverride: uvIndex);
+      } else if (response.statusCode == 404) {
+        return null; // City not found
       } else {
-        // ignore: avoid_print
-        print(
-          '[WeatherService] HTTP ${response.statusCode} - ${response.body.length} bytes for fetchWeatherByCoords',
-        );
-        return null;
+        throw ApiException(response.statusCode, 'Failed to fetch weather data');
       }
+    } on SocketException {
+      throw NetworkException('No internet connection');
     } catch (e) {
-      // ignore: avoid_print
-      print('Error fetching weather by coords: $e');
-      return null;
+      if (e is WeatherException) rethrow;
+      throw WeatherException('Unexpected error: $e');
     }
+  }
+
+  Future<double> _fetchUVIndex(double? lat, double? lon, String city) async {
+    try {
+      // If we don't have coords, we can't easily get UV from Open-Meteo without geocoding.
+      // For now, if no coords, return 0.0 or try to get coords from weather response (but that's circular).
+      // However, fetchWeather usually has coords if called by location, or we rely on city search.
+      // If city search, we might need to wait for weather response to get coords.
+      // Strategy: If lat/lon provided, fetch UV. If not, we'll have to skip UV for now or do a 2-step process.
+      // Actually, WeatherModel.fromJson parses the city coords.
+      // Let's change strategy: Fetch weather first, get coords, then fetch UV if needed.
+      // But to keep it fast, we'll only fetch UV if we have coords.
+
+      if (lat == null || lon == null) {
+        // If we are searching by city, we don't have coords yet.
+        // We'll return 0.0 here and handle it after parsing weather?
+        // Or better: Fetch weather, get coords from response, THEN fetch UV.
+        return 0.0;
+      }
+
+      final uvUrl = Uri.parse(
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=uv_index_max&timezone=auto&forecast_days=1',
+      );
+
+      final response = await client.get(uvUrl);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return (data['daily']['uv_index_max'][0] as num).toDouble();
+      }
+      return 0.0;
+    } catch (e) {
+      print('Error fetching UV index: $e');
+      return 0.0;
+    }
+  }
+
+  Future<WeatherModel?> fetchWeatherByCoords(double lat, double lon) async {
+    return fetchWeather('', lat: lat, lon: lon);
   }
 }

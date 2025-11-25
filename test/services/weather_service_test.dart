@@ -4,17 +4,23 @@ import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 import 'package:weather_insights_app/services/weather_service.dart';
 import 'package:weather_insights_app/models/weather_model.dart';
+import 'package:weather_insights_app/utils/exceptions.dart';
 import '../mocks.mocks.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() {
   group('WeatherService', () {
     late WeatherService weatherService;
     late MockClient mockClient;
 
+    setUpAll(() async {
+      await dotenv.load(fileName: "${Directory.current.path}/test/.env.test");
+    });
+
     setUp(() {
       mockClient = MockClient();
-      weatherService = WeatherService();
-      // Note: We'll need to refactor WeatherService to accept a client parameter
+      weatherService = WeatherService(client: mockClient);
     });
 
     group('fetchWeather by city', () {
@@ -33,7 +39,7 @@ void main() {
 
         // Assert
         expect(result, isA<WeatherModel>());
-        expect(result?.city, 'London');
+        expect(result?.city, 'Zocca');
         expect(result?.daily, isNotEmpty);
       });
 
@@ -50,17 +56,17 @@ void main() {
         expect(result, isNull);
       });
 
-      test('returns null when network error occurs', () async {
+      test('throws NetworkException when network error occurs', () async {
         // Arrange
         when(
           mockClient.get(any),
         ).thenThrow(const SocketException('No Internet'));
 
-        // Act
-        final result = await weatherService.fetchWeather('London');
-
-        // Assert
-        expect(result, isNull);
+        // Act & Assert
+        expect(
+          () => weatherService.fetchWeather('London'),
+          throwsA(isA<NetworkException>()),
+        );
       });
     });
 
@@ -83,7 +89,7 @@ void main() {
 
         // Assert
         expect(result, isA<WeatherModel>());
-        expect(result?.city, 'London');
+        expect(result?.city, 'Zocca');
       });
     });
   });

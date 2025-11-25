@@ -55,7 +55,10 @@ class WeatherModel {
     required this.lon,
   });
 
-  factory WeatherModel.fromJson(Map<String, dynamic> json) {
+  factory WeatherModel.fromJson(
+    Map<String, dynamic> json, {
+    double? uvIndexOverride,
+  }) {
     final List<dynamic> list = json['list'];
     final Map<String, List<dynamic>> grouped = {};
     for (var entry in list) {
@@ -117,7 +120,8 @@ class WeatherModel {
       final avgWind = sumWind / count;
       final avgWindDir = (sumWindDir / count).round();
       final avgCloud = (sumCloud / count).round();
-      final avgUvi = sumUvi / count; // Added for UVI
+      final avgUvi =
+          uvIndexOverride ?? (sumUvi / count); // Use override if available
 
       // choose representative weather entry (noon or first)
       final rep = entries.firstWhere(

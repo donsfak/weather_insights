@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import '../utils/exceptions.dart';
 
 /// Model for a single precipitation frame
 class PrecipitationFrame {
@@ -23,10 +24,15 @@ class PrecipitationService {
       'https://api.rainviewer.com/public/weather-maps.json';
   static const String _tileHost = 'https://tilecache.rainviewer.com';
 
+  final http.Client client;
+
+  PrecipitationService({http.Client? client})
+    : client = client ?? http.Client();
+
   /// Fetch precipitation frames (past and future)
   Future<List<PrecipitationFrame>> fetchFrames() async {
     try {
-      final response = await http.get(Uri.parse(_apiUrl));
+      final response = await client.get(Uri.parse(_apiUrl));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -53,15 +59,20 @@ class PrecipitationService {
           );
         }
 
-        debugPrint('[PrecipitationService] Fetched ${frames.length} frames');
+        // ignore: avoid_print
+        print('[PrecipitationService] Fetched ${frames.length} frames');
         return frames;
       } else {
-        debugPrint('[PrecipitationService] API error: ${response.statusCode}');
-        return [];
+        throw ApiException(
+          response.statusCode,
+          'Failed to fetch precipitation data',
+        );
       }
+    } on SocketException {
+      throw NetworkException('No internet connection');
     } catch (e) {
-      debugPrint('[PrecipitationService] Error: $e');
-      return [];
+      if (e is WeatherException) rethrow;
+      throw WeatherException('Unexpected error: $e');
     }
   }
 
