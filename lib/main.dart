@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:home_widget/home_widget.dart';
+import 'models/cache_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'managers/settings_manager.dart';
@@ -19,6 +22,13 @@ Future<void> main() async {
   await NotificationService.initialize();
 
   await dotenv.load(fileName: ".env");
+  await Hive.initFlutter();
+  Hive.registerAdapter(CachedWeatherAdapter());
+  Hive.registerAdapter(CachedAirQualityAdapter());
+
+  // Initialize HomeWidget
+  await HomeWidget.setAppGroupId('group.weather_insights');
+
   await SettingsManager().init();
 
   final prefs = await SharedPreferences.getInstance();

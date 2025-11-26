@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../utils/exceptions.dart';
+import '../utils/retry_utils.dart';
 
 /// Model for a single precipitation frame
 class PrecipitationFrame {
@@ -32,7 +33,10 @@ class PrecipitationService {
   /// Fetch precipitation frames (past and future)
   Future<List<PrecipitationFrame>> fetchFrames() async {
     try {
-      final response = await client.get(Uri.parse(_apiUrl));
+      final response = await RetryUtils.retry(
+        () => client.get(Uri.parse(_apiUrl)),
+        shouldRetry: (e) => e is SocketException || e is http.ClientException,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

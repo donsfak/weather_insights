@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:weather_insights_app/services/weather_service.dart';
 import 'package:weather_insights_app/models/weather_model.dart';
 import 'package:weather_insights_app/utils/exceptions.dart';
+import 'package:weather_insights_app/models/cache_models.dart';
+import 'package:hive/hive.dart';
 import '../mocks.mocks.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,11 +18,19 @@ void main() {
 
     setUpAll(() async {
       await dotenv.load(fileName: "${Directory.current.path}/test/.env.test");
+
+      // Initialize Hive for testing
+      final tempDir = await Directory.systemTemp.createTemp();
+      Hive.init(tempDir.path);
+      if (!Hive.isAdapterRegistered(0)) {
+        Hive.registerAdapter(CachedWeatherAdapter());
+      }
     });
 
-    setUp(() {
+    setUp(() async {
       mockClient = MockClient();
       weatherService = WeatherService(client: mockClient);
+      await Hive.deleteFromDisk(); // Clear cache before each test
     });
 
     group('fetchWeather by city', () {

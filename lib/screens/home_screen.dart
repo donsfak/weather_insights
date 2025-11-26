@@ -20,6 +20,10 @@ import '../models/air_quality_model.dart';
 import '../widgets/clothing_recommendation_card.dart';
 import '../widgets/air_quality_card.dart';
 import '../widgets/uv_index_card.dart';
+import '../widgets/error_state_widget.dart';
+import '../utils/exceptions.dart';
+
+import '../services/connectivity_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -38,11 +42,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final WeatherService _service = WeatherService();
   final AirQualityService _aqiService = AirQualityService();
+  final ConnectivityService _connectivityService = ConnectivityService();
   WeatherModel? _weather;
   AirQualityModel? _airQuality;
   final TextEditingController _controller = TextEditingController();
-  bool _loading = false;
+  bool _loading = true;
   String? _error;
+  bool _isOffline = false;
 
   late AnimationController _welcomeController;
   late AnimationController _fadeController;
@@ -52,6 +58,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+    _connectivityService.connectionStatus.listen((isConnected) {
+      if (mounted) {
+        setState(() {
+          _isOffline = !isConnected;
+        });
+        if (isConnected && _weather == null) {
+          _getWeather();
+        }
+      }
+    });
+    _connectivityService.initialize();
 
     _welcomeController = AnimationController(
       vsync: this,
@@ -76,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _connectivityService.dispose();
     _controller.dispose();
     _welcomeController.dispose();
     _fadeController.dispose();
@@ -123,6 +142,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           }
         }
       }
+    } on NetworkException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.message;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.message;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -410,42 +441,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (_isOffline)
+                        Container(
+                          width: double.infinity,
+                          color: Colors.black54,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: const Text(
+                            'Offline Mode',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
                       const SizedBox(height: 10),
                       _buildGlassSearchField(),
                       const SizedBox(height: 20),
 
-                      // Error message avec glass effect
+                      // Error message
                       if (_error != null)
-                        FadeTransition(
-                          opacity: _fadeController,
-                          child: GlassContainer(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                              horizontal: 16,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            color: Colors.red,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    _error!,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ErrorStateWidget(
+                            message: _error!,
+                            onRetry: _getWeather,
+                            isOffline: _error!.contains('connection'),
                           ),
                         ),
 

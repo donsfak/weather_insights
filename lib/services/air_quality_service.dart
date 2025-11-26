@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/air_quality_model.dart';
 import '../utils/exceptions.dart';
+import '../utils/retry_utils.dart';
+import 'cache_service.dart';
 
 class AirQualityService {
   final String baseUrl =
@@ -31,14 +33,32 @@ class AirQualityService {
       // ignore: avoid_print
       print('[AirQualityService] GET ${url.toString().replaceAll(key, '***')}');
 
-      final response = await client.get(url);
+      // Try to get cached data first
+      final cached = await CacheService.getCachedAirQuality(lat, lon);
+      if (cached != null) {
+        // ignore: avoid_print
+        print('[AirQualityService] Returning cached data for $lat, $lon');
+        return cached;
+      }
+
+      final response = await RetryUtils.retry(
+        () => client.get(url),
+        shouldRetry: (e) => e is SocketException || e is http.ClientException,
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['list'] != null && (data['list'] as List).isNotEmpty) {
-          return AirQualityModel.fromJson(data['list'][0]);
+        final aqi = AirQualityModel.fromJson(data);
+
+        // Cache the result
+        try {
+          await CacheService.saveAirQuality(lat, lon, aqi);
+        } catch (e) {
+          // ignore: avoid_print
+          print('[AirQualityService] Cache save error: $e');
         }
-        return null; // Valid response but no data
+
+        return aqi;
       } else {
         throw ApiException(
           response.statusCode,

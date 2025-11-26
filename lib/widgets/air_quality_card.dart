@@ -86,7 +86,7 @@ class AirQualityCard extends StatelessWidget {
                 children: [
                   _buildPollutant(
                     'PM2.5',
-                    airQuality!.pm25.toStringAsFixed(1),
+                    airQuality!.pm2_5.toStringAsFixed(1),
                     'μg/m³',
                   ),
                   _buildPollutant(

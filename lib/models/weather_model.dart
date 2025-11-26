@@ -36,6 +36,53 @@ class DailyForecast {
     required this.icon,
     required this.uvi,
   });
+
+  factory DailyForecast.fromJson(Map<String, dynamic> json) {
+    return DailyForecast(
+      date: DateTime.fromMillisecondsSinceEpoch((json['dt'] as int) * 1000),
+      temp: (json['temp']['day'] as num).toDouble(),
+      minTemp: (json['temp']['min'] as num).toDouble(),
+      maxTemp: (json['temp']['max'] as num).toDouble(),
+      condition: json['weather'][0]['main'],
+      icon: json['weather'][0]['icon'],
+      wind: (json['wind_speed'] as num).toDouble(),
+      humidity: (json['humidity'] as num).toInt(),
+      uvi: (json['uvi'] as num).toDouble(),
+      sunrise: json['sunrise'] != 0
+          ? DateTime.fromMillisecondsSinceEpoch((json['sunrise'] as int) * 1000)
+          : null,
+      sunset: json['sunset'] != 0
+          ? DateTime.fromMillisecondsSinceEpoch((json['sunset'] as int) * 1000)
+          : null,
+      pressure: (json['pressure'] as num).toInt(),
+      precipitation: (json['rain']?['3h'] as num?)?.toDouble() ?? 0.0,
+      cloudiness: (json['clouds']?['all'] as num?)?.toInt() ?? 0,
+      visibility: (json['visibility'] as num?)?.toDouble() ?? 0.0,
+      feelsLike: (json['feels_like'] as num).toDouble(),
+      windDirection: (json['wind_deg'] as num).toInt(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dt': date.millisecondsSinceEpoch ~/ 1000,
+      'temp': {'day': temp, 'min': minTemp, 'max': maxTemp},
+      'weather': [
+        {'main': condition, 'icon': icon},
+      ],
+      'wind_speed': wind,
+      'humidity': humidity,
+      'uvi': uvi,
+      'sunrise': sunrise != null ? sunrise!.millisecondsSinceEpoch ~/ 1000 : 0,
+      'sunset': sunset != null ? sunset!.millisecondsSinceEpoch ~/ 1000 : 0,
+      'pressure': pressure,
+      'rain': {'3h': precipitation},
+      'clouds': {'all': cloudiness},
+      'visibility': visibility,
+      'feels_like': feelsLike,
+      'wind_deg': windDirection,
+    };
+  }
 }
 
 class WeatherModel {
@@ -200,6 +247,34 @@ class WeatherModel {
       lon: (json['city']['coord']['lon'] as num).toDouble(),
     );
   }
+
+  factory WeatherModel.fromCacheJson(Map<String, dynamic> json) {
+    return WeatherModel(
+      city: json['city'],
+      lat: (json['lat'] as num).toDouble(),
+      lon: (json['lon'] as num).toDouble(),
+      daily: (json['daily'] as List)
+          .map((e) => DailyForecast.fromJson(e))
+          .toList(),
+      hourly: (json['hourly'] as List)
+          .map((e) => HourlyForecast.fromJson(e))
+          .toList(),
+      alerts: (json['alerts'] as List)
+          .map((e) => WeatherAlert.fromCacheJson(e))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'city': city,
+      'lat': lat,
+      'lon': lon,
+      'daily': daily.map((e) => e.toJson()).toList(),
+      'hourly': hourly.map((e) => e.toJson()).toList(),
+      'alerts': alerts.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
 class HourlyForecast {
@@ -222,6 +297,32 @@ class HourlyForecast {
     required this.condition,
     required this.icon,
   });
+
+  factory HourlyForecast.fromJson(Map<String, dynamic> json) {
+    return HourlyForecast(
+      dateTime: DateTime.parse(json['dateTime']),
+      temp: (json['temp'] as num).toDouble(),
+      feelsLike: (json['feelsLike'] as num).toDouble(),
+      humidity: (json['humidity'] as num).toInt(),
+      wind: (json['wind'] as num).toDouble(),
+      precipitation: (json['precipitation'] as num).toDouble(),
+      condition: json['condition'],
+      icon: json['icon'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dateTime': dateTime.toIso8601String(),
+      'temp': temp,
+      'feelsLike': feelsLike,
+      'humidity': humidity,
+      'wind': wind,
+      'precipitation': precipitation,
+      'condition': condition,
+      'icon': icon,
+    };
+  }
 }
 
 class WeatherAlert {
@@ -247,5 +348,25 @@ class WeatherAlert {
       end: DateTime.fromMillisecondsSinceEpoch((json['end'] as int) * 1000),
       description: json['description'] ?? '',
     );
+  }
+
+  factory WeatherAlert.fromCacheJson(Map<String, dynamic> json) {
+    return WeatherAlert(
+      sender: json['sender'],
+      event: json['event'],
+      start: DateTime.parse(json['start']),
+      end: DateTime.parse(json['end']),
+      description: json['description'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sender': sender,
+      'event': event,
+      'start': start.toIso8601String(),
+      'end': end.toIso8601String(),
+      'description': description,
+    };
   }
 }

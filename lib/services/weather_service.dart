@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'cache_service.dart';
 import '../models/weather_model.dart';
 import '../utils/exceptions.dart';
+import '../utils/retry_utils.dart';
 
 class WeatherService {
   final String baseUrl = 'https://api.openweathermap.org/data/2.5';
@@ -40,15 +41,23 @@ class WeatherService {
     // ignore: avoid_print
     print('[WeatherService] GET ${url.toString().replaceAll(key, '***')}');
 
+    // Try to get cached data first
+    if (city.isNotEmpty) {
+      final cached = await CacheService.getCachedWeather(city);
+      if (cached != null) {
+        // ignore: avoid_print
+        print('[WeatherService] Returning cached data for $city');
+        return cached;
+      }
+    }
+
     try {
-      final response = await client.get(url);
+      final response = await RetryUtils.retry(
+        () => client.get(url),
+        shouldRetry: (e) => e is SocketException || e is http.ClientException,
+      );
 
       if (response.statusCode == 200) {
-        // cache the last successful response
-        try {
-          await CacheService.saveLastWeatherJson(response.body);
-        } catch (_) {}
-
         final data = json.decode(response.body);
 
         // Extract coordinates from weather response to fetch UV index
@@ -74,7 +83,23 @@ class WeatherService {
           uvIndex = await _fetchUVIndex(fetchedLat, fetchedLon, city);
         }
 
-        return WeatherModel.fromJson(data, uvIndexOverride: uvIndex);
+        final weatherModel = WeatherModel.fromJson(
+          data,
+          uvIndexOverride: uvIndex,
+        );
+
+        // cache the successful response
+        try {
+          await CacheService.saveWeather(
+            city.isEmpty ? 'current_location' : city,
+            weatherModel,
+          );
+        } catch (e) {
+          // ignore: avoid_print
+          print('[WeatherService] Cache save error: $e');
+        }
+
+        return weatherModel;
       } else if (response.statusCode == 404) {
         return null; // City not found
       } else {
