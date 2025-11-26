@@ -226,6 +226,7 @@ class WeatherModel {
         precipitation:
             ((e['rain']?['3h'] as num?)?.toDouble() ?? 0.0) +
             ((e['snow']?['3h'] as num?)?.toDouble() ?? 0.0),
+        pop: (e['pop'] as num?)?.toDouble() ?? 0.0,
         condition: weather != null ? (weather['description'] as String) : '',
         icon: weather != null ? (weather['icon'] as String) : '',
       );
@@ -284,6 +285,7 @@ class HourlyForecast {
   final int humidity;
   final double wind;
   final double precipitation;
+  final double pop; // Probability of precipitation (0-1)
   final String condition;
   final String icon;
 
@@ -294,6 +296,7 @@ class HourlyForecast {
     required this.humidity,
     required this.wind,
     required this.precipitation,
+    required this.pop,
     required this.condition,
     required this.icon,
   });
@@ -306,6 +309,7 @@ class HourlyForecast {
       humidity: (json['humidity'] as num).toInt(),
       wind: (json['wind'] as num).toDouble(),
       precipitation: (json['precipitation'] as num).toDouble(),
+      pop: (json['pop'] as num?)?.toDouble() ?? 0.0,
       condition: json['condition'],
       icon: json['icon'],
     );
@@ -319,6 +323,7 @@ class HourlyForecast {
       'humidity': humidity,
       'wind': wind,
       'precipitation': precipitation,
+      'pop': pop,
       'condition': condition,
       'icon': icon,
     };
