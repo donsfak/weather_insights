@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/weather_model.dart';
 
 class AnimatedWeatherCard extends StatefulWidget {
@@ -16,7 +17,8 @@ class AnimatedWeatherCard extends StatefulWidget {
   State<AnimatedWeatherCard> createState() => _AnimatedWeatherCardState();
 }
 
-class _AnimatedWeatherCardState extends State<AnimatedWeatherCard> with SingleTickerProviderStateMixin {
+class _AnimatedWeatherCardState extends State<AnimatedWeatherCard>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _scaleController;
 
   @override
@@ -118,12 +120,28 @@ class _AnimatedWeatherCardState extends State<AnimatedWeatherCard> with SingleTi
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Image.network(
-                        'https://openweathermap.org/img/wn/${widget.day.icon}@2x.png',
+                      CachedNetworkImage(
+                        imageUrl:
+                            'https://openweathermap.org/img/wn/${widget.day.icon}@2x.png',
                         width: 60,
                         height: 60,
-                        errorBuilder: (context, error, stackTrace) => 
-                            const Icon(Icons.cloud, size: 48, color: Colors.white),
+                        placeholder: (context, url) => const SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Icon(
+                          Icons.cloud,
+                          size: 48,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(

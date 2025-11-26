@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../managers/settings_manager.dart';
 import '../services/weather_service.dart';
 import '../models/weather_model.dart';
@@ -37,8 +38,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Layer Control
   String _currentLayer = 'precipitation'; // precipitation, temp_new
-  final String _apiKey =
-      'e1f10a1e78da46f5b10a8f027813603c'; // Replace with env var in real app
+  final String _apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
 
   @override
   void initState() {
