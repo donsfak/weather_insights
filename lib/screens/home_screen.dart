@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() {
           _isOffline = !isConnected;
         });
-        if (isConnected && _weather == null) {
+        if (isConnected && _weather == null && _controller.text.isNotEmpty) {
           _getWeather();
         }
       }
@@ -470,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         _buildGlassSearchField(),
                         const SizedBox(height: 20),
 
-                        // Error message
+                        // Error or Main Content
                         if (_error != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 16),
@@ -479,277 +479,282 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               onRetry: _getWeather,
                               isOffline: _error!.contains('connection'),
                             ),
-                          ),
-
-                        // Main content
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 700),
-                          transitionBuilder: (child, animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: SlideTransition(
-                                position: _slideTransition,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _weather != null
-                              ? Column(
-                                  key: const ValueKey('forecast'),
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Main Content
-                                    if (_weather != null &&
-                                        _weather!.alerts.isNotEmpty)
-                                      ..._weather!.alerts.map(
-                                        (alert) => AlertBanner(
-                                          alert: alert,
-                                          onDismiss: () {
-                                            setState(() {
-                                              _weather!.alerts.remove(alert);
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    // Main Weather Display
-                                    Column(
-                                      children: [
-                                        Text(
-                                          _weather!.city,
-                                          style: const TextStyle(
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                          )
+                        else
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 700),
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: _slideTransition,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _weather != null
+                                ? Column(
+                                    key: const ValueKey('forecast'),
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // Main Content
+                                      if (_weather != null &&
+                                          _weather!.alerts.isNotEmpty)
+                                        ..._weather!.alerts.map(
+                                          (alert) => AlertBanner(
+                                            alert: alert,
+                                            onDismiss: () {
+                                              setState(() {
+                                                _weather!.alerts.remove(alert);
+                                              });
+                                            },
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.2,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            "Updating",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 20),
-                                        AnimatedWeatherIcon(
-                                          description:
-                                              _weather!.daily.first.condition,
-                                          size: 120,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        ValueListenableBuilder<bool>(
-                                          valueListenable:
-                                              SettingsManager().isCelsius,
-                                          builder: (context, isCelsius, _) {
-                                            final temp = SettingsManager()
-                                                .convertTemp(
-                                                  _weather!.daily.first.temp,
-                                                );
-                                            return Text(
-                                              "${temp.toStringAsFixed(0)}${SettingsManager().tempUnit}",
-                                              style: const TextStyle(
-                                                fontSize: 80,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                height: 1.0,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        Text(
-                                          _weather!.daily.first.condition
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.white.withOpacity(
-                                              0.9,
-                                            ),
-                                            letterSpacing: 1.2,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          _getDayName(DateTime.now()),
-                                          style: TextStyle(
-                                            color: Colors.white.withOpacity(
-                                              0.7,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 30),
-
-                                    // Weather Stats Row
-                                    GlassContainer(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 20,
-                                        horizontal: 01,
-                                      ),
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
+                                      // Main Weather Display
+                                      Column(
                                         children: [
+                                          Text(
+                                            _weather!.city,
+                                            style: const TextStyle(
+                                              fontSize: 32,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(
+                                                0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: const Text(
+                                              "Updating",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          AnimatedWeatherIcon(
+                                            description:
+                                                _weather!.daily.first.condition,
+                                            size: 120,
+                                          ),
+                                          const SizedBox(height: 10),
                                           ValueListenableBuilder<bool>(
                                             valueListenable:
                                                 SettingsManager().isCelsius,
                                             builder: (context, isCelsius, _) {
-                                              final speed = SettingsManager()
-                                                  .convertSpeed(
-                                                    _weather!.daily.first.wind,
+                                              final temp = SettingsManager()
+                                                  .convertTemp(
+                                                    _weather!.daily.first.temp,
                                                   );
-                                              return _buildStatItem(
-                                                Icons.air,
-                                                "${speed.toStringAsFixed(1)} ${SettingsManager().speedUnit}",
-                                                "Wind",
+                                              return Text(
+                                                "${temp.toStringAsFixed(0)}${SettingsManager().tempUnit}",
+                                                style: const TextStyle(
+                                                  fontSize: 80,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  height: 1.0,
+                                                ),
                                               );
                                             },
                                           ),
-                                          _buildStatItem(
-                                            Icons.water_drop,
-                                            "${_weather!.daily.first.humidity}%",
-                                            "Humidity",
+                                          Text(
+                                            _weather!.daily.first.condition
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white.withOpacity(
+                                                0.9,
+                                              ),
+                                              letterSpacing: 1.2,
+                                            ),
                                           ),
-                                          _buildStatItem(
-                                            Icons.umbrella,
-                                            "87%",
-                                            "Chance of rain",
-                                          ), // Mock data for now
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            _getDayName(DateTime.now()),
+                                            style: TextStyle(
+                                              color: Colors.white.withOpacity(
+                                                0.7,
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                    ),
+                                      const SizedBox(height: 30),
 
-                                    const SizedBox(height: 24),
-
-                                    // Clothing Recommendation
-                                    if (_weather != null)
-                                      ClothingRecommendationCard(
-                                        temperature: _weather!.daily.first.temp,
-                                        condition:
-                                            _weather!.daily.first.condition,
-                                        wind: _weather!.daily.first.wind,
-                                        humidity:
-                                            _weather!.daily.first.humidity,
-                                      ),
-
-                                    const SizedBox(height: 24),
-
-                                    // Air Quality
-                                    if (_airQuality != null)
-                                      AirQualityCard(airQuality: _airQuality),
-
-                                    const SizedBox(height: 24),
-
-                                    // UV Index
-                                    if (_weather != null)
-                                      UVIndexCard(
-                                        uvIndex: _weather!.daily.first.uvi,
-                                      ),
-
-                                    const SizedBox(height: 24),
-
-                                    // Hourly Precipitation Graph
-                                    if (_weather != null &&
-                                        _weather!.hourly.isNotEmpty)
-                                      HourlyPrecipitationGraph(
-                                        hourlyData: _weather!.hourly,
-                                      ),
-
-                                    const SizedBox(height: 24),
-                                    // 7-Day Forecast Header
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text(
-                                          "Hourly Forecast",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                      // Weather Stats Row
+                                      GlassContainer(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 20,
+                                          horizontal: 01,
                                         ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AdvancedChartsScreen(
-                                                      weatherData: _weather!,
-                                                    ),
-                                              ),
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            ValueListenableBuilder<bool>(
+                                              valueListenable:
+                                                  SettingsManager().isCelsius,
+                                              builder: (context, isCelsius, _) {
+                                                final speed = SettingsManager()
+                                                    .convertSpeed(
+                                                      _weather!
+                                                          .daily
+                                                          .first
+                                                          .wind,
+                                                    );
+                                                return _buildStatItem(
+                                                  Icons.air,
+                                                  "${speed.toStringAsFixed(1)} ${SettingsManager().speedUnit}",
+                                                  "Wind",
+                                                );
+                                              },
+                                            ),
+                                            _buildStatItem(
+                                              Icons.water_drop,
+                                              "${_weather!.daily.first.humidity}%",
+                                              "Humidity",
+                                            ),
+                                            _buildStatItem(
+                                              Icons.umbrella,
+                                              "87%",
+                                              "Chance of rain",
+                                            ), // Mock data for now
+                                          ],
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 24),
+
+                                      // Clothing Recommendation
+                                      if (_weather != null)
+                                        ClothingRecommendationCard(
+                                          temperature:
+                                              _weather!.daily.first.temp,
+                                          condition:
+                                              _weather!.daily.first.condition,
+                                          wind: _weather!.daily.first.wind,
+                                          humidity:
+                                              _weather!.daily.first.humidity,
+                                        ),
+
+                                      const SizedBox(height: 24),
+
+                                      // Air Quality
+                                      if (_airQuality != null)
+                                        AirQualityCard(airQuality: _airQuality),
+
+                                      const SizedBox(height: 24),
+
+                                      // UV Index
+                                      if (_weather != null)
+                                        UVIndexCard(
+                                          uvIndex: _weather!.daily.first.uvi,
+                                        ),
+
+                                      const SizedBox(height: 24),
+
+                                      // Hourly Precipitation Graph
+                                      if (_weather != null &&
+                                          _weather!.hourly.isNotEmpty)
+                                        HourlyPrecipitationGraph(
+                                          hourlyData: _weather!.hourly,
+                                        ),
+
+                                      const SizedBox(height: 24),
+                                      // 7-Day Forecast Header
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            "Hourly Forecast",
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AdvancedChartsScreen(
+                                                        weatherData: _weather!,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  "7 days",
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withOpacity(0.7),
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                const Icon(
+                                                  Icons.chevron_right,
+                                                  color: Colors.white70,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // Daily Forecast List
+                                      SizedBox(
+                                        height: 160,
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: _weather!.hourly.length,
+                                          separatorBuilder: (context, index) =>
+                                              const SizedBox(width: 12),
+                                          itemBuilder: (context, i) {
+                                            final hour = _weather!.hourly[i];
+                                            return _buildHourlyWeatherCard(
+                                              hour,
                                             );
                                           },
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                "7 days",
-                                                style: TextStyle(
-                                                  color: Colors.white
-                                                      .withOpacity(0.7),
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                              const Icon(
-                                                Icons.chevron_right,
-                                                color: Colors.white70,
-                                              ),
-                                            ],
-                                          ),
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-
-                                    // Daily Forecast List
-                                    SizedBox(
-                                      height: 160,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: _weather!.hourly.length,
-                                        separatorBuilder: (context, index) =>
-                                            const SizedBox(width: 12),
-                                        itemBuilder: (context, i) {
-                                          final hour = _weather!.hourly[i];
-                                          return _buildHourlyWeatherCard(hour);
-                                        },
                                       ),
+                                      const SizedBox(height: 24),
+                                      ForecastChart(
+                                        dailyForecast: _weather!.daily,
+                                      ),
+                                      const SizedBox(height: 24),
+                                    ],
+                                  )
+                                : ScaleTransition(
+                                    key: const ValueKey('welcome'),
+                                    scale: _welcomeScale,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 40,
+                                      ),
+                                      child: _buildModernWelcome(),
                                     ),
-                                    const SizedBox(height: 24),
-                                    ForecastChart(
-                                      dailyForecast: _weather!.daily,
-                                    ),
-                                    const SizedBox(height: 24),
-                                  ],
-                                )
-                              : ScaleTransition(
-                                  key: const ValueKey('welcome'),
-                                  scale: _welcomeScale,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 40,
-                                    ),
-                                    child: _buildModernWelcome(),
                                   ),
-                                ),
-                        ),
+                          ),
                       ],
                     ),
                   ),

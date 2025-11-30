@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'cache_service.dart';
@@ -142,7 +143,7 @@ class WeatherService {
       }
       return 0.0;
     } catch (e) {
-      print('Error fetching UV index: $e');
+      debugPrint('Error fetching UV index: $e');
       return 0.0;
     }
   }

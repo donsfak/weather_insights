@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
 import '../widgets/glass_container.dart';
-import 'package:flutter/services.dart';
 
 class WeatherAlertsCard extends StatelessWidget {
   final List<WeatherAlert> alerts;

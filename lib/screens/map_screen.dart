@@ -383,6 +383,14 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
+
+          // Precipitation Legend (Bottom Left)
+          if (_currentLayer == 'precipitation')
+            Positioned(
+              bottom: 40,
+              left: 16,
+              child: const PrecipitationLegend(),
+            ),
         ],
       ),
     );
