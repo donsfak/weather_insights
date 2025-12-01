@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsManager {
@@ -10,11 +10,19 @@ class SettingsManager {
 
   final ValueNotifier<bool> isCelsius = ValueNotifier(true);
   final ValueNotifier<List<String>> savedLocations = ValueNotifier([]);
+  final ValueNotifier<Locale> locale = ValueNotifier(const Locale('en'));
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     isCelsius.value = _prefs.getBool('isCelsius') ?? true;
     savedLocations.value = _prefs.getStringList('savedLocations') ?? [];
+    final langCode = _prefs.getString('languageCode') ?? 'en';
+    locale.value = Locale(langCode);
+  }
+
+  Future<void> setLocale(Locale newLocale) async {
+    locale.value = newLocale;
+    await _prefs.setString('languageCode', newLocale.languageCode);
   }
 
   Future<void> toggleUnit() async {

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:weather_insights_app/components/theme_switcher.dart';
+import '../l10n/app_localizations.dart';
 import 'package:weather_insights_app/widgets/glass_container.dart';
 import '../widgets/animated_weather_icon.dart';
 import 'dart:math' show sin;
@@ -514,13 +515,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       // Main Weather Display
                                       Column(
                                         children: [
-                                          Text(
-                                            _weather!.city,
-                                            style: const TextStyle(
-                                              fontSize: 32,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                _weather!.city,
+                                                style: const TextStyle(
+                                                  fontSize: 32,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              ValueListenableBuilder<
+                                                List<String>
+                                              >(
+                                                valueListenable:
+                                                    SettingsManager()
+                                                        .savedLocations,
+                                                builder: (context, saved, _) {
+                                                  final isSaved = saved
+                                                      .contains(_weather!.city);
+                                                  return IconButton(
+                                                    icon: Icon(
+                                                      isSaved
+                                                          ? Icons.favorite
+                                                          : Icons
+                                                                .favorite_border,
+                                                      color: isSaved
+                                                          ? Colors.redAccent
+                                                          : Colors.white70,
+                                                    ),
+                                                    onPressed: () {
+                                                      if (isSaved) {
+                                                        SettingsManager()
+                                                            .removeLocation(
+                                                              _weather!.city,
+                                                            );
+                                                      } else {
+                                                        SettingsManager()
+                                                            .addLocation(
+                                                              _weather!.city,
+                                                            );
+                                                      }
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ],
                                           ),
                                           const SizedBox(height: 8),
                                           Container(
@@ -535,9 +578,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                             ),
-                                            child: const Text(
-                                              "Updating",
-                                              style: TextStyle(
+                                            child: Text(
+                                              _weather!.daily.first.condition,
+                                              style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
@@ -776,11 +819,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: SafeArea(
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  "Settings & Favorites",
-                  style: TextStyle(
+                  AppLocalizations.of(context)!.settings,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -789,9 +832,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const Divider(color: Colors.white30),
               ListTile(
-                title: const Text(
-                  "Temperature Unit",
-                  style: TextStyle(color: Colors.white),
+                title: Text(
+                  AppLocalizations.of(context)!.temperatureUnit,
+                  style: const TextStyle(color: Colors.white),
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -808,16 +851,64 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               const Divider(color: Colors.white30),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.language,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                trailing: ValueListenableBuilder<Locale>(
+                  valueListenable: SettingsManager().locale,
+                  builder: (context, locale, _) {
+                    return DropdownButton<String>(
+                      value: locale.languageCode,
+                      dropdownColor: const Color(0xFF1E3C72),
+                      style: const TextStyle(color: Colors.white),
+                      underline: Container(),
+                      icon: const Icon(Icons.language, color: Colors.white),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          SettingsManager().setLocale(Locale(newValue));
+                        }
+                      },
+                      items: [
+                        DropdownMenuItem(
+                          value: 'en',
+                          child: Text(AppLocalizations.of(context)!.english),
+                        ),
+                        DropdownMenuItem(
+                          value: 'fr',
+                          child: Text(AppLocalizations.of(context)!.french),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const Divider(color: Colors.white30),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Saved Locations",
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.savedLocations,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    AppLocalizations.of(context)!.enterCity,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                 ),
@@ -827,10 +918,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   valueListenable: SettingsManager().savedLocations,
                   builder: (context, locations, child) {
                     if (locations.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          "No saved locations",
-                          style: TextStyle(color: Colors.white70),
+                          AppLocalizations.of(context)!.noSavedLocations,
+                          style: const TextStyle(color: Colors.white70),
                         ),
                       );
                     }

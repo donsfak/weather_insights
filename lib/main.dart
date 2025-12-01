@@ -4,13 +4,15 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:home_widget/home_widget.dart';
+
 import 'models/cache_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'managers/settings_manager.dart';
 import 'services/widget_service.dart';
 import 'services/notification_service.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +27,6 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(CachedWeatherAdapter());
   Hive.registerAdapter(CachedAirQualityAdapter());
-
-  // Initialize HomeWidget
-  await HomeWidget.setAppGroupId('group.weather_insights');
 
   await SettingsManager().init();
 
@@ -74,45 +73,61 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Weather Insights App',
-      themeMode: _themeMode,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFF667eea),
-        cardColor: Colors.white.withOpacity(0.2),
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme)
-            .apply(
-              bodyColor: Colors.white,
-              displayColor: Colors.white,
-              fontFamilyFallback: [
-                'Noto Sans',
-                'Noto Sans Symbols',
-                'Noto Color Emoji',
-              ],
-            ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF1E3C72),
-        cardColor: Colors.black.withOpacity(0.2),
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme)
-            .apply(
-              bodyColor: Colors.white,
-              displayColor: Colors.white,
-              fontFamilyFallback: [
-                'Noto Sans',
-                'Noto Sans Symbols',
-                'Noto Color Emoji',
-              ],
-            ),
-      ),
-      home: HomeScreen(
-        onToggleTheme: _toggleTheme,
-        isDarkMode: _themeMode == ThemeMode.dark,
-      ),
+    return ValueListenableBuilder<Locale>(
+      valueListenable: SettingsManager().locale,
+      builder: (context, locale, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Weather Insights App',
+          themeMode: _themeMode,
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'), // English
+            Locale('fr'), // French
+          ],
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primarySwatch: Colors.blue,
+            scaffoldBackgroundColor: const Color(0xFF667eea),
+            cardColor: Colors.white.withOpacity(0.2),
+            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme)
+                .apply(
+                  bodyColor: Colors.white,
+                  displayColor: Colors.white,
+                  fontFamilyFallback: [
+                    'Noto Sans',
+                    'Noto Sans Symbols',
+                    'Noto Color Emoji',
+                  ],
+                ),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF1E3C72),
+            cardColor: Colors.black.withOpacity(0.2),
+            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme)
+                .apply(
+                  bodyColor: Colors.white,
+                  displayColor: Colors.white,
+                  fontFamilyFallback: [
+                    'Noto Sans',
+                    'Noto Sans Symbols',
+                    'Noto Color Emoji',
+                  ],
+                ),
+          ),
+          home: HomeScreen(
+            onToggleTheme: _toggleTheme,
+            isDarkMode: _themeMode == ThemeMode.dark,
+          ),
+        );
+      },
     );
   }
 }

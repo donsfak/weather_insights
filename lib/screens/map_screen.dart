@@ -11,7 +11,6 @@ import 'dart:ui';
 import '../widgets/map_timeline_control.dart';
 import '../widgets/precipitation_overlay.dart';
 import '../widgets/precipitation_legend.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
 class MapScreen extends StatefulWidget {
   final LatLng? initialLocation;
@@ -184,7 +183,7 @@ class _MapScreenState extends State<MapScreen> {
                     'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
                 subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.example.weather_insights_app',
-                tileProvider: CancellableNetworkTileProvider(),
+                tileProvider: NetworkTileProvider(),
               ),
               // Apple Weather-style Precipitation Overlay
               if (_currentLayer == 'precipitation')
@@ -197,6 +196,13 @@ class _MapScreenState extends State<MapScreen> {
                 TileLayer(
                   urlTemplate:
                       'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=$_apiKey',
+                  userAgentPackageName: 'com.example.weather_insights_app',
+                ),
+              // Radar Layer (RainViewer)
+              if (_currentLayer == 'radar')
+                TileLayer(
+                  urlTemplate:
+                      'https://tile.rainviewer.com/img/radar_nowcast_10m/256/{z}/{x}/{y}/2/1_1.png',
                   userAgentPackageName: 'com.example.weather_insights_app',
                 ),
               // User location marker
@@ -242,13 +248,18 @@ class _MapScreenState extends State<MapScreen> {
                     setState(() {
                       if (_currentLayer == 'precipitation') {
                         _currentLayer = 'temp_new';
+                      } else if (_currentLayer == 'temp_new') {
+                        _currentLayer = 'radar';
                       } else {
                         _currentLayer = 'precipitation';
                       }
                     });
+
                     String layerName = 'PRECIPITATION';
                     if (_currentLayer == 'temp_new') {
                       layerName = 'TEMPERATURE';
+                    } else if (_currentLayer == 'radar') {
+                      layerName = 'RADAR (RainViewer)';
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -313,7 +324,7 @@ class _MapScreenState extends State<MapScreen> {
 
           // Precipitation Legend (Top Right, below layers button)
           if (_currentLayer == 'precipitation')
-            const Positioned(top: 100, right: 16, child: PrecipitationLegend()),
+            const Positioned(top: 180, right: 16, child: PrecipitationLegend()),
           // Timeline Control (bottom)
           Positioned(
             bottom: 32,
