@@ -27,5 +27,16 @@
   "good": "Good",
   "airQualityGoodDesc": "Air quality is good. Ideal for outdoor activities.",
   "chanceOfRain": "Chance of rain",
-  "radar": "Radar"
+  "radar": "Radar",
+  "hourlyForecast": "Hourly Forecast",
+  "sevenDays": "7 days",
+  "overcastClouds": "Overcast Clouds",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "uvIndex": "UV Index"
 }

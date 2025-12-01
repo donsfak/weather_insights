@@ -271,6 +271,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Radar'**
   String get radar;
+
+  /// No description provided for @hourlyForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly Forecast'**
+  String get hourlyForecast;
+
+  /// No description provided for @sevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get sevenDays;
+
+  /// No description provided for @overcastClouds.
+  ///
+  /// In en, this message translates to:
+  /// **'Overcast Clouds'**
+  String get overcastClouds;
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// No description provided for @uvIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'UV Index'**
+  String get uvIndex;
 }
 
 class _AppLocalizationsDelegate

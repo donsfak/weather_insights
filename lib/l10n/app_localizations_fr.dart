@@ -95,4 +95,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get radar => 'Radar';
+
+  @override
+  String get hourlyForecast => 'Prévisions Horaires';
+
+  @override
+  String get sevenDays => '7 jours';
+
+  @override
+  String get overcastClouds => 'Nuages Couverts';
+
+  @override
+  String get monday => 'Lundi';
+
+  @override
+  String get tuesday => 'Mardi';
+
+  @override
+  String get wednesday => 'Mercredi';
+
+  @override
+  String get thursday => 'Jeudi';
+
+  @override
+  String get friday => 'Vendredi';
+
+  @override
+  String get saturday => 'Samedi';
+
+  @override
+  String get sunday => 'Dimanche';
+
+  @override
+  String get uvIndex => 'Indice UV';
 }

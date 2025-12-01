@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/air_quality_model.dart';
 import 'dart:ui';
+import '../l10n/app_localizations.dart';
 
 class AirQualityCard extends StatelessWidget {
   final AirQualityModel? airQuality;
@@ -36,8 +37,8 @@ class AirQualityCard extends StatelessWidget {
                 children: [
                   Icon(Icons.air, color: aqiColor, size: 28),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Air Quality',
+                  Text(
+                    AppLocalizations.of(context)!.airQuality,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

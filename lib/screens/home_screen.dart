@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 32),
             Text(
-              "Weather Insights",
+              AppLocalizations.of(context)!.weatherInsights,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              "Enter a city to discover the weather",
+              AppLocalizations.of(context)!.enterCity,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -277,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
-              hintText: "Search city (e.g., Abidjan)",
+              hintText: AppLocalizations.of(context)!.searchCity,
               hintStyle: TextStyle(
                 color: Colors.white.withOpacity(0.6),
                 fontSize: 15,
@@ -385,9 +385,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             backgroundColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: 0,
-            title: const Text(
-              "🌤️ Weather Insights",
-              style: TextStyle(
+            title: Text(
+              "🌤️ ${AppLocalizations.of(context)!.weatherInsights}",
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,

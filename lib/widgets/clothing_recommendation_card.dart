@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import '../l10n/app_localizations.dart';
 
 class ClothingRecommendationCard extends StatelessWidget {
   final double temperature;
@@ -36,12 +37,12 @@ class ClothingRecommendationCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.checkroom, color: Colors.white, size: 24),
-                  SizedBox(width: 12),
+                  const Icon(Icons.checkroom, color: Colors.white, size: 24),
+                  const SizedBox(width: 12),
                   Text(
-                    'What to Wear',
+                    AppLocalizations.of(context)!.whatToWear,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

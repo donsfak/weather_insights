@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class UVIndexCard extends StatelessWidget {
   final double uvIndex;
@@ -26,8 +27,8 @@ class UVIndexCard extends StatelessWidget {
             children: [
               Icon(Icons.wb_sunny, color: uvColor, size: 24),
               const SizedBox(width: 8),
-              const Text(
-                'UV Index',
+              Text(
+                AppLocalizations.of(context)!.uvIndex,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
