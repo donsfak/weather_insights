@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/weather_model.dart';
+import '../l10n/app_localizations.dart';
 import 'dart:math' as math;
 
 class AdvancedChartsScreen extends StatefulWidget {
@@ -53,9 +54,12 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        title: const Text(
-          "📊 Advanced Analytics",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          "📊 ${AppLocalizations.of(context)!.advancedAnalytics}",
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -154,9 +158,9 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Multi-Parameter Analysis",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.multiParameterAnalysis,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -166,15 +170,27 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
                 Wrap(
                   spacing: 8,
                   children: [
-                    _buildFilterChip("Temperature", _showTemp, () {
-                      setState(() => _showTemp = !_showTemp);
-                    }),
-                    _buildFilterChip("Humidity", _showHumidity, () {
-                      setState(() => _showHumidity = !_showHumidity);
-                    }),
-                    _buildFilterChip("Wind", _showWind, () {
-                      setState(() => _showWind = !_showWind);
-                    }),
+                    _buildFilterChip(
+                      AppLocalizations.of(context)!.temperature,
+                      _showTemp,
+                      () {
+                        setState(() => _showTemp = !_showTemp);
+                      },
+                    ),
+                    _buildFilterChip(
+                      AppLocalizations.of(context)!.humidity,
+                      _showHumidity,
+                      () {
+                        setState(() => _showHumidity = !_showHumidity);
+                      },
+                    ),
+                    _buildFilterChip(
+                      AppLocalizations.of(context)!.wind,
+                      _showWind,
+                      () {
+                        setState(() => _showWind = !_showWind);
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -195,7 +211,7 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
     if (hourlyData.isEmpty) {
       return Center(
         child: Text(
-          "No data available",
+          AppLocalizations.of(context)!.noDataAvailable,
           style: TextStyle(color: Colors.white.withOpacity(0.7)),
         ),
       );
@@ -378,7 +394,7 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
       children: [
         Expanded(
           child: _buildStatCard(
-            "Avg Temp",
+            AppLocalizations.of(context)!.avgTemp,
             "${avgTemp.toStringAsFixed(1)}°C",
             Icons.thermostat,
             Colors.orange,
@@ -387,7 +403,7 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            "Avg Humidity",
+            AppLocalizations.of(context)!.avgHumidity,
             "${avgHumidity.toStringAsFixed(0)}%",
             Icons.water_drop,
             Colors.blue,
@@ -396,7 +412,7 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            "Avg Wind",
+            AppLocalizations.of(context)!.avgWind,
             "${avgWind.toStringAsFixed(1)} m/s",
             Icons.air,
             Colors.green,
@@ -464,9 +480,9 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
           _buildGlassCard(
             child: Column(
               children: [
-                const Text(
-                  "Weather Conditions Radar",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.weatherRadar,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -504,15 +520,25 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
                       getTitle: (index, angle) {
                         switch (index) {
                           case 0:
-                            return const RadarChartTitle(text: 'Temp');
+                            return RadarChartTitle(
+                              text: AppLocalizations.of(context)!.temperature,
+                            );
                           case 1:
-                            return const RadarChartTitle(text: 'Humidity');
+                            return RadarChartTitle(
+                              text: AppLocalizations.of(context)!.humidity,
+                            );
                           case 2:
-                            return const RadarChartTitle(text: 'Wind');
+                            return RadarChartTitle(
+                              text: AppLocalizations.of(context)!.wind,
+                            );
                           case 3:
-                            return const RadarChartTitle(text: 'Pressure');
+                            return RadarChartTitle(
+                              text: AppLocalizations.of(context)!.pressure,
+                            );
                           case 4:
-                            return const RadarChartTitle(text: 'Clouds');
+                            return RadarChartTitle(
+                              text: AppLocalizations.of(context)!.clouds,
+                            );
                           default:
                             return const RadarChartTitle(text: '');
                         }
@@ -548,18 +574,30 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
     return Column(
       children: [
         _buildLegendItem(
-          "🌡️ Temperature",
+          "🌡️ ${AppLocalizations.of(context)!.temperature}",
           "${day.temp.toStringAsFixed(1)}°C",
           Colors.orange,
         ),
-        _buildLegendItem("💧 Humidity", "${day.humidity}%", Colors.blue),
         _buildLegendItem(
-          "💨 Wind Speed",
+          "💧 ${AppLocalizations.of(context)!.humidity}",
+          "${day.humidity}%",
+          Colors.blue,
+        ),
+        _buildLegendItem(
+          "💨 ${AppLocalizations.of(context)!.wind}",
           "${day.wind.toStringAsFixed(1)} m/s",
           Colors.green,
         ),
-        _buildLegendItem("🔽 Pressure", "${day.pressure} hPa", Colors.purple),
-        _buildLegendItem("☁️ Cloudiness", "${day.cloudiness}%", Colors.grey),
+        _buildLegendItem(
+          "🔽 ${AppLocalizations.of(context)!.pressure}",
+          "${day.pressure} hPa",
+          Colors.purple,
+        ),
+        _buildLegendItem(
+          "☁️ ${AppLocalizations.of(context)!.clouds}",
+          "${day.cloudiness}%",
+          Colors.grey,
+        ),
       ],
     );
   }
@@ -635,9 +673,9 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Day vs Night Comparison",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.dayVsNight,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -665,17 +703,17 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
                             getTitlesWidget: (value, meta) {
                               switch (value.toInt()) {
                                 case 0:
-                                  return const Text(
-                                    'Temperature',
-                                    style: TextStyle(
+                                  return Text(
+                                    AppLocalizations.of(context)!.temperature,
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
                                     ),
                                   );
                                 case 1:
-                                  return const Text(
-                                    'Humidity',
-                                    style: TextStyle(
+                                  return Text(
+                                    AppLocalizations.of(context)!.humidity,
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
                                     ),
@@ -766,9 +804,15 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildComparisonLegend("☀️ Day", Colors.orange),
+                    _buildComparisonLegend(
+                      "☀️ ${AppLocalizations.of(context)!.day}",
+                      Colors.orange,
+                    ),
                     const SizedBox(width: 24),
-                    _buildComparisonLegend("🌙 Night", Colors.blue[900]!),
+                    _buildComparisonLegend(
+                      "🌙 ${AppLocalizations.of(context)!.night}",
+                      Colors.blue[900]!,
+                    ),
                   ],
                 ),
               ],
@@ -812,9 +856,9 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Temperature Heatmap (7 Days)",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.temperatureHeatmap,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -827,14 +871,14 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
                     itemCount: widget.weatherData.daily.length,
                     itemBuilder: (context, index) {
                       final day = widget.weatherData.daily[index];
-                      final dayName = _getDayName(day.date);
+                      final dayName = _getDayName(context, day.date);
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
                           children: [
                             SizedBox(
-                              width: 60,
+                              width: 90,
                               child: Text(
                                 dayName,
                                 style: const TextStyle(
@@ -890,9 +934,26 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
     );
   }
 
-  String _getDayName(DateTime date) {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[date.weekday - 1];
+  String _getDayName(BuildContext context, DateTime date) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (date.weekday) {
+      case 1:
+        return localizations.monday;
+      case 2:
+        return localizations.tuesday;
+      case 3:
+        return localizations.wednesday;
+      case 4:
+        return localizations.thursday;
+      case 5:
+        return localizations.friday;
+      case 6:
+        return localizations.saturday;
+      case 7:
+        return localizations.sunday;
+      default:
+        return '';
+    }
   }
 
   Color _getTempColor(double temp) {
@@ -907,9 +968,9 @@ class _AdvancedChartsScreenState extends State<AdvancedChartsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Temperature Scale:",
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context)!.temperatureScale,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 12,

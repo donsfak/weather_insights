@@ -324,7 +324,11 @@ class _MapScreenState extends State<MapScreen> {
 
           // Precipitation Legend (Top Right, below layers button)
           if (_currentLayer == 'precipitation')
-            const Positioned(top: 180, right: 16, child: PrecipitationLegend()),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 260,
+              right: 16,
+              child: const PrecipitationLegend(),
+            ),
           // Timeline Control (bottom)
           Positioned(
             bottom: 32,
@@ -393,14 +397,6 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
               ),
-            ),
-
-          // Precipitation Legend (Bottom Left)
-          if (_currentLayer == 'precipitation')
-            Positioned(
-              bottom: 40,
-              left: 16,
-              child: const PrecipitationLegend(),
             ),
         ],
       ),

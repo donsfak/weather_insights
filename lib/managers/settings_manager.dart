@@ -9,12 +9,14 @@ class SettingsManager {
   late SharedPreferences _prefs;
 
   final ValueNotifier<bool> isCelsius = ValueNotifier(true);
+  final ValueNotifier<bool> notificationsEnabled = ValueNotifier(true);
   final ValueNotifier<List<String>> savedLocations = ValueNotifier([]);
   final ValueNotifier<Locale> locale = ValueNotifier(const Locale('en'));
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     isCelsius.value = _prefs.getBool('isCelsius') ?? true;
+    notificationsEnabled.value = _prefs.getBool('notificationsEnabled') ?? true;
     savedLocations.value = _prefs.getStringList('savedLocations') ?? [];
     final langCode = _prefs.getString('languageCode') ?? 'en';
     locale.value = Locale(langCode);
@@ -28,6 +30,11 @@ class SettingsManager {
   Future<void> toggleUnit() async {
     isCelsius.value = !isCelsius.value;
     await _prefs.setBool('isCelsius', isCelsius.value);
+  }
+
+  Future<void> toggleNotifications() async {
+    notificationsEnabled.value = !notificationsEnabled.value;
+    await _prefs.setBool('notificationsEnabled', notificationsEnabled.value);
   }
 
   Future<void> addLocation(String city) async {

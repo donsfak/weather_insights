@@ -337,6 +337,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'UV Index'**
   String get uvIndex;
+
+  /// No description provided for @uvLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get uvLow;
+
+  /// No description provided for @uvModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get uvModerate;
+
+  /// No description provided for @uvHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get uvHigh;
+
+  /// No description provided for @uvVeryHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Very High'**
+  String get uvVeryHigh;
+
+  /// No description provided for @uvExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme'**
+  String get uvExtreme;
+
+  /// No description provided for @uvRecLow.
+  ///
+  /// In en, this message translates to:
+  /// **'No protection needed'**
+  String get uvRecLow;
+
+  /// No description provided for @uvRecModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Wear sunscreen SPF 30+'**
+  String get uvRecModerate;
+
+  /// No description provided for @uvRecHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'SPF 30+, hat, sunglasses'**
+  String get uvRecHigh;
+
+  /// No description provided for @uvRecVeryHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra protection required'**
+  String get uvRecVeryHigh;
+
+  /// No description provided for @uvRecExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid sun exposure 10AM-4PM'**
+  String get uvRecExtreme;
+
+  /// No description provided for @heavyCoat.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy coat'**
+  String get heavyCoat;
+
+  /// No description provided for @gloves.
+  ///
+  /// In en, this message translates to:
+  /// **'Gloves'**
+  String get gloves;
+
+  /// No description provided for @scarf.
+  ///
+  /// In en, this message translates to:
+  /// **'Scarf'**
+  String get scarf;
+
+  /// No description provided for @jacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Jacket'**
+  String get jacket;
+
+  /// No description provided for @longSleeves.
+  ///
+  /// In en, this message translates to:
+  /// **'Long sleeves'**
+  String get longSleeves;
+
+  /// No description provided for @lightClothes.
+  ///
+  /// In en, this message translates to:
+  /// **'Light clothes'**
+  String get lightClothes;
+
+  /// No description provided for @umbrella.
+  ///
+  /// In en, this message translates to:
+  /// **'Umbrella'**
+  String get umbrella;
+
+  /// No description provided for @boots.
+  ///
+  /// In en, this message translates to:
+  /// **'Boots'**
+  String get boots;
+
+  /// No description provided for @sunglasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunglasses'**
+  String get sunglasses;
+
+  /// No description provided for @windbreaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Windbreaker'**
+  String get windbreaker;
+
+  /// No description provided for @aqiGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get aqiGood;
+
+  /// No description provided for @aqiFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get aqiFair;
+
+  /// No description provided for @aqiModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get aqiModerate;
+
+  /// No description provided for @aqiPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get aqiPoor;
+
+  /// No description provided for @aqiVeryPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Poor'**
+  String get aqiVeryPoor;
+
+  /// No description provided for @aqiRecGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Air quality is good. Ideal for outdoor activities.'**
+  String get aqiRecGood;
+
+  /// No description provided for @aqiRecFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Air quality is acceptable. Sensitive groups should limit outdoor exposure.'**
+  String get aqiRecFair;
+
+  /// No description provided for @aqiRecModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce prolonged outdoor exertion. Sensitive groups should avoid outdoor activities.'**
+  String get aqiRecModerate;
+
+  /// No description provided for @aqiRecPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid outdoor activities. Everyone may experience health effects.'**
+  String get aqiRecPoor;
+
+  /// No description provided for @aqiRecVeryPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay indoors. Air quality is hazardous to health.'**
+  String get aqiRecVeryPoor;
+
+  /// No description provided for @precipLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get precipLight;
+
+  /// No description provided for @precipMod.
+  ///
+  /// In en, this message translates to:
+  /// **'Mod'**
+  String get precipMod;
+
+  /// No description provided for @precipHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy'**
+  String get precipHeavy;
+
+  /// No description provided for @precipStorm.
+  ///
+  /// In en, this message translates to:
+  /// **'Storm'**
+  String get precipStorm;
+
+  /// No description provided for @advancedAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Analytics'**
+  String get advancedAnalytics;
+
+  /// No description provided for @multiParameterAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-Parameter Analysis'**
+  String get multiParameterAnalysis;
+
+  /// No description provided for @noDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noDataAvailable;
+
+  /// No description provided for @avgTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Temp'**
+  String get avgTemp;
+
+  /// No description provided for @avgHumidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Humidity'**
+  String get avgHumidity;
+
+  /// No description provided for @avgWind.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Wind'**
+  String get avgWind;
+
+  /// No description provided for @weatherRadar.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather Conditions Radar'**
+  String get weatherRadar;
+
+  /// No description provided for @pressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get pressure;
+
+  /// No description provided for @clouds.
+  ///
+  /// In en, this message translates to:
+  /// **'Clouds'**
+  String get clouds;
+
+  /// No description provided for @dayVsNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Day vs Night Comparison'**
+  String get dayVsNight;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get day;
+
+  /// No description provided for @night.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get night;
+
+  /// No description provided for @precipitationForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'Precipitation Forecast'**
+  String get precipitationForecast;
+
+  /// No description provided for @likely.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely'**
+  String get likely;
+
+  /// No description provided for @veryLikely.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Likely'**
+  String get veryLikely;
+
+  /// No description provided for @temperatureHeatmap.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature Heatmap (7 Days)'**
+  String get temperatureHeatmap;
+
+  /// No description provided for @temperatureScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature Scale:'**
+  String get temperatureScale;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @enableNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get enableNotifications;
 }
 
 class _AppLocalizationsDelegate

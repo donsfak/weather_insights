@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/weather_model.dart';
 import '../widgets/glass_container.dart';
+import '../l10n/app_localizations.dart';
 
 class HourlyPrecipitationGraph extends StatelessWidget {
   final List<HourlyForecast> hourlyData;
@@ -22,9 +23,9 @@ class HourlyPrecipitationGraph extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Precipitation Forecast',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.precipitationForecast,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -153,7 +154,8 @@ class HourlyPrecipitationGraph extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildLegend(),
+          const SizedBox(height: 16),
+          _buildLegend(context),
         ],
       ),
     );
@@ -167,14 +169,30 @@ class HourlyPrecipitationGraph extends StatelessWidget {
     return Colors.blue;
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildLegendItem('Low', Colors.blue.withOpacity(0.3), '< 20%'),
-        _buildLegendItem('Moderate', Colors.blue.withOpacity(0.5), '20-40%'),
-        _buildLegendItem('Likely', Colors.blue.withOpacity(0.7), '40-60%'),
-        _buildLegendItem('Very Likely', Colors.blue, '> 60%'),
+        _buildLegendItem(
+          AppLocalizations.of(context)!.uvLow,
+          Colors.blue.withOpacity(0.3),
+          '< 20%',
+        ),
+        _buildLegendItem(
+          AppLocalizations.of(context)!.uvModerate,
+          Colors.blue.withOpacity(0.5),
+          '20-40%',
+        ),
+        _buildLegendItem(
+          AppLocalizations.of(context)!.likely,
+          Colors.blue.withOpacity(0.7),
+          '40-60%',
+        ),
+        _buildLegendItem(
+          AppLocalizations.of(context)!.veryLikely,
+          Colors.blue,
+          '> 60%',
+        ),
       ],
     );
   }

@@ -128,4 +128,167 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uvIndex => 'UV Index';
+
+  @override
+  String get uvLow => 'Low';
+
+  @override
+  String get uvModerate => 'Moderate';
+
+  @override
+  String get uvHigh => 'High';
+
+  @override
+  String get uvVeryHigh => 'Very High';
+
+  @override
+  String get uvExtreme => 'Extreme';
+
+  @override
+  String get uvRecLow => 'No protection needed';
+
+  @override
+  String get uvRecModerate => 'Wear sunscreen SPF 30+';
+
+  @override
+  String get uvRecHigh => 'SPF 30+, hat, sunglasses';
+
+  @override
+  String get uvRecVeryHigh => 'Extra protection required';
+
+  @override
+  String get uvRecExtreme => 'Avoid sun exposure 10AM-4PM';
+
+  @override
+  String get heavyCoat => 'Heavy coat';
+
+  @override
+  String get gloves => 'Gloves';
+
+  @override
+  String get scarf => 'Scarf';
+
+  @override
+  String get jacket => 'Jacket';
+
+  @override
+  String get longSleeves => 'Long sleeves';
+
+  @override
+  String get lightClothes => 'Light clothes';
+
+  @override
+  String get umbrella => 'Umbrella';
+
+  @override
+  String get boots => 'Boots';
+
+  @override
+  String get sunglasses => 'Sunglasses';
+
+  @override
+  String get windbreaker => 'Windbreaker';
+
+  @override
+  String get aqiGood => 'Good';
+
+  @override
+  String get aqiFair => 'Fair';
+
+  @override
+  String get aqiModerate => 'Moderate';
+
+  @override
+  String get aqiPoor => 'Poor';
+
+  @override
+  String get aqiVeryPoor => 'Very Poor';
+
+  @override
+  String get aqiRecGood => 'Air quality is good. Ideal for outdoor activities.';
+
+  @override
+  String get aqiRecFair =>
+      'Air quality is acceptable. Sensitive groups should limit outdoor exposure.';
+
+  @override
+  String get aqiRecModerate =>
+      'Reduce prolonged outdoor exertion. Sensitive groups should avoid outdoor activities.';
+
+  @override
+  String get aqiRecPoor =>
+      'Avoid outdoor activities. Everyone may experience health effects.';
+
+  @override
+  String get aqiRecVeryPoor =>
+      'Stay indoors. Air quality is hazardous to health.';
+
+  @override
+  String get precipLight => 'Light';
+
+  @override
+  String get precipMod => 'Mod';
+
+  @override
+  String get precipHeavy => 'Heavy';
+
+  @override
+  String get precipStorm => 'Storm';
+
+  @override
+  String get advancedAnalytics => 'Advanced Analytics';
+
+  @override
+  String get multiParameterAnalysis => 'Multi-Parameter Analysis';
+
+  @override
+  String get noDataAvailable => 'No data available';
+
+  @override
+  String get avgTemp => 'Avg Temp';
+
+  @override
+  String get avgHumidity => 'Avg Humidity';
+
+  @override
+  String get avgWind => 'Avg Wind';
+
+  @override
+  String get weatherRadar => 'Weather Conditions Radar';
+
+  @override
+  String get pressure => 'Pressure';
+
+  @override
+  String get clouds => 'Clouds';
+
+  @override
+  String get dayVsNight => 'Day vs Night Comparison';
+
+  @override
+  String get day => 'Day';
+
+  @override
+  String get night => 'Night';
+
+  @override
+  String get precipitationForecast => 'Precipitation Forecast';
+
+  @override
+  String get likely => 'Likely';
+
+  @override
+  String get veryLikely => 'Very Likely';
+
+  @override
+  String get temperatureHeatmap => 'Temperature Heatmap (7 Days)';
+
+  @override
+  String get temperatureScale => 'Temperature Scale:';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
 }

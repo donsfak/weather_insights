@@ -61,7 +61,7 @@ class AirQualityCard extends StatelessWidget {
                       border: Border.all(color: aqiColor, width: 2),
                     ),
                     child: Text(
-                      airQuality!.aqiLevel,
+                      _getAQILevel(context, airQuality!.aqi),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -72,7 +72,7 @@ class AirQualityCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      airQuality!.healthRecommendation,
+                      _getHealthRecommendation(context, airQuality!.aqi),
                       style: const TextStyle(
                         fontSize: 13,
                         color: Colors.white70,
@@ -144,6 +144,40 @@ class AirQualityCard extends StatelessWidget {
         return const Color(0xFF6B49C8); // Very Poor - Purple
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getAQILevel(BuildContext context, int aqi) {
+    switch (aqi) {
+      case 1:
+        return AppLocalizations.of(context)!.aqiGood;
+      case 2:
+        return AppLocalizations.of(context)!.aqiFair;
+      case 3:
+        return AppLocalizations.of(context)!.aqiModerate;
+      case 4:
+        return AppLocalizations.of(context)!.aqiPoor;
+      case 5:
+        return AppLocalizations.of(context)!.aqiVeryPoor;
+      default:
+        return 'Unknown';
+    }
+  }
+
+  String _getHealthRecommendation(BuildContext context, int aqi) {
+    switch (aqi) {
+      case 1:
+        return AppLocalizations.of(context)!.aqiRecGood;
+      case 2:
+        return AppLocalizations.of(context)!.aqiRecFair;
+      case 3:
+        return AppLocalizations.of(context)!.aqiRecModerate;
+      case 4:
+        return AppLocalizations.of(context)!.aqiRecPoor;
+      case 5:
+        return AppLocalizations.of(context)!.aqiRecVeryPoor;
+      default:
+        return 'Air quality data unavailable.';
     }
   }
 }

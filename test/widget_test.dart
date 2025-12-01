@@ -9,6 +9,7 @@ void main() {
   ) async {
     // Lance l'app avec un thème par défaut
     await tester.pumpWidget(const MyApp(initialThemeMode: ThemeMode.light));
+    await tester.pumpAndSettle(); // Wait for localizations to load
 
     // Vérifie que le titre de l'app est présent
     expect(find.text('🌤️ Weather Insights'), findsOneWidget);
@@ -22,6 +23,7 @@ void main() {
 
   testWidgets('Search field accepts input', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp(initialThemeMode: ThemeMode.light));
+    await tester.pumpAndSettle();
 
     // Trouve le TextField
     final textField = find.byType(TextField);
@@ -42,6 +44,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const MyApp(initialThemeMode: ThemeMode.light));
+    await tester.pumpAndSettle();
 
     // Entre du texte
     await tester.enterText(find.byType(TextField), 'Paris');
@@ -59,6 +62,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const MyApp(initialThemeMode: ThemeMode.light));
+    await tester.pumpAndSettle();
 
     // Vérifie que le widget ThemeSwitcher est présent
     final themeSwitcher = find.byType(ThemeSwitcher);

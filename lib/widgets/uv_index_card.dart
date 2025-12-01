@@ -8,7 +8,7 @@ class UVIndexCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uvLevel = _getUVLevel(uvIndex);
+    final uvLevel = _getUVLevel(context, uvIndex);
     final uvColor = _getUVColor(uvIndex);
 
     return Container(
@@ -63,7 +63,7 @@ class UVIndexCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _getUVRecommendation(uvIndex),
+                      _getUVRecommendation(context, uvIndex),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,
@@ -115,12 +115,12 @@ class UVIndexCard extends StatelessWidget {
     );
   }
 
-  String _getUVLevel(double uv) {
-    if (uv < 3) return 'Low';
-    if (uv < 6) return 'Moderate';
-    if (uv < 8) return 'High';
-    if (uv < 11) return 'Very High';
-    return 'Extreme';
+  String _getUVLevel(BuildContext context, double uv) {
+    if (uv < 3) return AppLocalizations.of(context)!.uvLow;
+    if (uv < 6) return AppLocalizations.of(context)!.uvModerate;
+    if (uv < 8) return AppLocalizations.of(context)!.uvHigh;
+    if (uv < 11) return AppLocalizations.of(context)!.uvVeryHigh;
+    return AppLocalizations.of(context)!.uvExtreme;
   }
 
   Color _getUVColor(double uv) {
@@ -131,11 +131,11 @@ class UVIndexCard extends StatelessWidget {
     return const Color(0xFF6B49C8);
   }
 
-  String _getUVRecommendation(double uv) {
-    if (uv < 3) return 'No protection needed';
-    if (uv < 6) return 'Wear sunscreen SPF 30+';
-    if (uv < 8) return 'SPF 30+, hat, sunglasses';
-    if (uv < 11) return 'Extra protection required';
-    return 'Avoid sun exposure 10AM-4PM';
+  String _getUVRecommendation(BuildContext context, double uv) {
+    if (uv < 3) return AppLocalizations.of(context)!.uvRecLow;
+    if (uv < 6) return AppLocalizations.of(context)!.uvRecModerate;
+    if (uv < 8) return AppLocalizations.of(context)!.uvRecHigh;
+    if (uv < 11) return AppLocalizations.of(context)!.uvRecVeryHigh;
+    return AppLocalizations.of(context)!.uvRecExtreme;
   }
 }

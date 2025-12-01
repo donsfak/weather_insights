@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:weather_insights_app/components/theme_switcher.dart';
 import '../l10n/app_localizations.dart';
-import 'package:weather_insights_app/widgets/glass_container.dart';
+import '../widgets/glass_container.dart';
+import 'package:intl/intl.dart';
 import '../widgets/animated_weather_icon.dart';
 import 'dart:math' show sin;
 import '../services/weather_service.dart';
@@ -17,6 +18,7 @@ import '../widgets/alert_banner.dart';
 import '../screens/map_screen.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/air_quality_service.dart';
+import '../services/notification_service.dart';
 import '../models/air_quality_model.dart';
 import '../widgets/clothing_recommendation_card.dart';
 import '../widgets/air_quality_card.dart';
@@ -142,6 +144,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             setState(() {
               _airQuality = aqi;
             });
+          }
+        }
+
+        // Trigger Notifications
+        if (SettingsManager().notificationsEnabled.value) {
+          if (data.alerts.isNotEmpty) {
+            for (final alert in data.alerts) {
+              NotificationService.showWeatherAlert(alert);
+            }
+          } else {
+            // Optional: Show daily summary if no alerts
+            // NotificationService.showDailySummary(data);
           }
         }
       }
@@ -724,9 +738,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Text(
-                                            "Hourly Forecast",
-                                            style: TextStyle(
+                                          Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.hourlyForecast,
+                                            style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
@@ -746,7 +762,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             child: Row(
                                               children: [
                                                 Text(
-                                                  "7 days",
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.sevenDays,
                                                   style: TextStyle(
                                                     color: Colors.white
                                                         .withOpacity(0.7),
@@ -848,6 +866,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     const Text("°C", style: TextStyle(color: Colors.white)),
                   ],
+                ),
+              ),
+              const Divider(color: Colors.white30),
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.notifications,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.enableNotifications,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                trailing: ValueListenableBuilder<bool>(
+                  valueListenable: SettingsManager().notificationsEnabled,
+                  builder: (context, enabled, _) {
+                    return Switch(
+                      value: enabled,
+                      onChanged: (val) async {
+                        if (val) {
+                          await NotificationService.requestPermissions();
+                        }
+                        SettingsManager().toggleNotifications();
+                      },
+                      activeColor: Colors.white,
+                      activeTrackColor: Colors.greenAccent,
+                    );
+                  },
                 ),
               ),
               const Divider(color: Colors.white30),
@@ -1029,29 +1074,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   String _getDayName(DateTime date) {
-    final days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return "${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]}";
+    final locale = Localizations.localeOf(context).toString();
+    // Format: "Monday, 1 December" -> EEEE, d MMMM
+    return DateFormat('EEEE, d MMMM', locale).format(date);
   }
 }

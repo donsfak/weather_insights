@@ -27,6 +27,16 @@ class NotificationService {
     debugPrint('[NotificationService] Initialized');
   }
 
+  static Future<void> requestPermissions() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+
+    await androidImplementation?.requestNotificationsPermission();
+  }
+
   /// Show weather alert notification
   static Future<void> showWeatherAlert(WeatherAlert alert) async {
     const androidDetails = AndroidNotificationDetails(

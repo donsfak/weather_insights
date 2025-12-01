@@ -18,7 +18,7 @@ class ClothingRecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recommendations = _getRecommendations();
+    final recommendations = _getRecommendations(context);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -95,41 +95,80 @@ class ClothingRecommendationCard extends StatelessWidget {
     );
   }
 
-  List<Map<String, String>> _getRecommendations() {
+  List<Map<String, String>> _getRecommendations(BuildContext context) {
     final recommendations = <Map<String, String>>[];
 
     // Temperature-based
     if (temperature < 0) {
-      recommendations.add({'icon': '🧥', 'label': 'Heavy coat'});
-      recommendations.add({'icon': '🧤', 'label': 'Gloves'});
-      recommendations.add({'icon': '🧣', 'label': 'Scarf'});
+      recommendations.add({
+        'icon': '🧥',
+        'label': AppLocalizations.of(context)!.heavyCoat,
+      });
+      recommendations.add({
+        'icon': '🧤',
+        'label': AppLocalizations.of(context)!.gloves,
+      });
+      recommendations.add({
+        'icon': '🧣',
+        'label': AppLocalizations.of(context)!.scarf,
+      });
     } else if (temperature < 10) {
-      recommendations.add({'icon': '🧥', 'label': 'Jacket'});
-      recommendations.add({'icon': '🧣', 'label': 'Scarf'});
+      recommendations.add({
+        'icon': '🧥',
+        'label': AppLocalizations.of(context)!.jacket,
+      });
+      recommendations.add({
+        'icon': '🧣',
+        'label': AppLocalizations.of(context)!.scarf,
+      });
     } else if (temperature < 20) {
-      recommendations.add({'icon': '👕', 'label': 'Long sleeves'});
+      recommendations.add({
+        'icon': '👕',
+        'label': AppLocalizations.of(context)!.longSleeves,
+      });
     } else if (temperature < 25) {
-      recommendations.add({'icon': '👕', 'label': 'Light clothes'});
+      recommendations.add({
+        'icon': '👕',
+        'label': AppLocalizations.of(context)!.lightClothes,
+      });
     } else {
-      recommendations.add({'icon': '👕', 'label': 'T-shirt'});
-      recommendations.add({'icon': '🧢', 'label': 'Hat'});
+      recommendations.add({
+        'icon': '👕',
+        'label': AppLocalizations.of(context)!.tShirt,
+      });
+      recommendations.add({
+        'icon': '🧢',
+        'label': AppLocalizations.of(context)!.hat,
+      });
     }
 
     // Condition-based
     final lower = condition.toLowerCase();
     if (lower.contains('rain') || lower.contains('drizzle')) {
-      recommendations.add({'icon': '☂️', 'label': 'Umbrella'});
+      recommendations.add({
+        'icon': '☂️',
+        'label': AppLocalizations.of(context)!.umbrella,
+      });
     }
     if (lower.contains('snow')) {
-      recommendations.add({'icon': '👢', 'label': 'Boots'});
+      recommendations.add({
+        'icon': '👢',
+        'label': AppLocalizations.of(context)!.boots,
+      });
     }
     if (lower.contains('sun') || lower.contains('clear')) {
-      recommendations.add({'icon': '🕶️', 'label': 'Sunglasses'});
+      recommendations.add({
+        'icon': '🕶️',
+        'label': AppLocalizations.of(context)!.sunglasses,
+      });
     }
 
     // Wind-based
     if (wind > 10) {
-      recommendations.add({'icon': '🧥', 'label': 'Windbreaker'});
+      recommendations.add({
+        'icon': '🧥',
+        'label': AppLocalizations.of(context)!.windbreaker,
+      });
     }
 
     return recommendations;

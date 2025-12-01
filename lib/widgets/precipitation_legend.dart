@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import '../l10n/app_localizations.dart';
 
 class PrecipitationLegend extends StatelessWidget {
   const PrecipitationLegend({super.key});
@@ -21,9 +22,9 @@ class PrecipitationLegend extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Precipitation',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.precipitation,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -33,13 +34,25 @@ class PrecipitationLegend extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildColorBox(const Color(0xFF00A8E0), 'Light'),
+                  _buildColorBox(
+                    const Color(0xFF00A8E0),
+                    AppLocalizations.of(context)!.precipLight,
+                  ),
                   const SizedBox(width: 4),
-                  _buildColorBox(const Color(0xFF0078D4), 'Mod'),
+                  _buildColorBox(
+                    const Color(0xFF0078D4),
+                    AppLocalizations.of(context)!.precipMod,
+                  ),
                   const SizedBox(width: 4),
-                  _buildColorBox(const Color(0xFF0050A0), 'Heavy'),
+                  _buildColorBox(
+                    const Color(0xFF0050A0),
+                    AppLocalizations.of(context)!.precipHeavy,
+                  ),
                   const SizedBox(width: 4),
-                  _buildColorBox(const Color(0xFFFFD700), 'Storm'),
+                  _buildColorBox(
+                    const Color(0xFFFFD700),
+                    AppLocalizations.of(context)!.precipStorm,
+                  ),
                 ],
               ),
             ],
